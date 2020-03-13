@@ -77,9 +77,11 @@
   <ItemGroup>
     <ClCompile Include="log.c" />
     <ClCompile Include="main.c" />
+    <ClCompile Include="plugin_proc.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="log.h" />
+    <ClInclude Include="plugin_proc.h" />
   </ItemGroup>
   <ItemDefinitionGroup />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
