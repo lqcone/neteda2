@@ -1,6 +1,7 @@
 
 #include<syslog.h>
 #include<pthread.h>
+#include<stdlib.h>
 #include "log.h"
 #include"plugin_proc.h"
 
@@ -29,11 +30,15 @@ struct netdata_static_thread static_threads[] = {
 
 void main()
 {
-    int i;
-    printf("hello from neteda2!\n");
+	int i;
+	for (i = 0; static_threads[i].name != NULL; i++) {
+		struct netdata_static_thread* st = &static_threads[i];
+		if (st->enabled) {
+			st->thread = malloc(sizeof(pthread_t));
+		}
+	}
+	
 
-    fatal("this is the fatal function test.\n");
-    
 
     
 }
