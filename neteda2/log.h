@@ -2,6 +2,8 @@
 #include<stdarg.h>
 
 
+#define DEBUG (0)
+
 
 extern unsigned long long debug_flags;
 
@@ -9,6 +11,7 @@ extern unsigned long long debug_flags;
 
 #define debug(type, args...) do { if(unlikely(!silent && (debug_flags & type))) debug_int(__FILE__, __FUNCTION__, __LINE__, ##args); } while(0)
 #define info(args...)    info_int(__FILE__, __FUNCTION__, __LINE__, ##args)
+#define error(args...)  error_int("ERROR",__FILE__, __FUNCTION__, __LINE__, ##args)
 
 
 

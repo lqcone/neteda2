@@ -1,9 +1,12 @@
 #include<time.h>
 #include<errno.h>
 #include<syslog.h>
+#include<errno.h>
 #include"log.h"
 
 const char* program_name = "";
+unsigned long long debug_flags = DEBUG;
+
 
 
 int access_log_syslog = 1;
@@ -144,4 +147,34 @@ void info_int(const char* file, const char* function, const unsigned long line, 
 		vsyslog(LOG_INFO, fmt, args);
 		va_end(args);
 	}
+}
+
+void error_int(const char *prefix,const char* file, const char* function, const unsigned long line, const char* fmt, ...) {
+	va_list args;
+
+	// prevent logging too much
+	if (error_log_limit(0)) return;
+
+	log_date(stderr);
+
+	if (debug_flags) fprintf(stderr, "%s (%04lu@%-10.10s:%-15.15s): %s: ",prefix, line, file, function, program_name);
+	else            fprintf(stderr, "%s: %s: ",prefix, program_name);
+	vfprintf(stderr, fmt, args);
+	va_end(args);
+
+	if (errno) {
+		char buff[200];
+		char* s = strerror_r(errno, buff, 200);
+		fprintf(stderr, " ((errno %d,%s)\n", errno, s);
+		errno = 0;
+	}
+	else fprintf(stderr, "\n");
+
+	if (error_log_syslog) {
+		va_start(args, fmt);
+		vsyslog(LOG_ERR, fmt, args);
+		va_end(args);
+
+	}
+
 }
