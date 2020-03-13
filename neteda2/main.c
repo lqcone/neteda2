@@ -35,7 +35,18 @@ void main()
 		struct netdata_static_thread* st = &static_threads[i];
 		if (st->enabled) {
 			st->thread = malloc(sizeof(pthread_t));
+			if (!st->thread)
+				fatal("Can not allocate pthread_t memory");
+
+			info("Starting thread %s.", st->name);
+
+			if (pthread_create(st->thread, NULL, st->start_routine, NULL))
+				error("faild to create new thread for %s", st->name);
+			else if (pthread_detach(*st->thread))
+				error("Can not request detach of newly created %s thread.", st->name);
+
 		}
+		else info("Not starting thread %s.", st->name);
 	}
 	
 
