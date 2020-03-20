@@ -3,8 +3,14 @@
 
 
 void* proc_main(void* ptr){
-	if (ptr) { ; }       //线程变成中的一种机制？
+	
+	int vdo_proc_stat = 1;
 
+	
 	info("PROC Plugin thread created with task id %d", gettid());
+	if (!vdo_proc_stat) {
+		debug(D_PROCNETDEV_LOOP, "PROCNETDEV: calling_do_proc_stat");
+
+	}
 
 }

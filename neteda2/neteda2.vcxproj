@@ -74,6 +74,9 @@
   <ImportGroup Label="Shared" />
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <RemoteLdToolExe>gcc</RemoteLdToolExe>
+  </PropertyGroup>
   <ItemGroup>
     <ClCompile Include="common.c" />
     <ClCompile Include="log.c" />

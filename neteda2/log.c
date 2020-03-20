@@ -13,6 +13,8 @@ int access_log_syslog = 1;
 int error_log_syslog = 1;
 int output_log_syslog = 1;	// debug log
 
+int silent = 0;
+
 time_t error_log_throttle_period = 1200;
 unsigned long error_log_errors_per_period = 200;
 	
