@@ -82,11 +82,14 @@
     <ClCompile Include="log.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="plugin_proc.c" />
+    <ClCompile Include="proc_stat.c" />
+    <ClCompile Include="rrd.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common.h" />
     <ClInclude Include="log.h" />
     <ClInclude Include="plugin_proc.h" />
+    <ClInclude Include="rrd.h" />
   </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile />

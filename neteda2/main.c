@@ -9,17 +9,17 @@
 
 
 struct netdata_static_thread {
-	char* name;
+	char *name;
 
-	char* config_section;
-	char* config_name;
+	char *config_section;
+	char *config_name;
 
 	int enabled;
 
 	pthread_t* thread;
 
 	void (*init_routine) (void);
-	void* (*start_routine) (void*);
+	void *(*start_routine) (void*);
 };
 
 struct netdata_static_thread static_threads[] = {
@@ -49,7 +49,9 @@ void main()
 		else info("Not starting thread %s.", st->name);
 	}
 	
-
+	for (;;) {
+		sleep(1);
+	}
 
     
 }
