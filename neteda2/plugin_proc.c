@@ -13,4 +13,9 @@ void* proc_main(void* ptr){
 
 	}
 
+	for (; 1;) {
+		fprintf(stdout, "this is the proc thread\n");
+		sleep(1);
+	}
+
 }
