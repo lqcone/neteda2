@@ -15,6 +15,8 @@ unsigned long long sutime(){
 
 void* proc_main(void* ptr){
 	
+	//if (ptr) { ; }
+	
 	int vdo_proc_stat = 1;
 	unsigned long long sunow;
 
@@ -31,7 +33,7 @@ void* proc_main(void* ptr){
 		debug(D_PROCNETDEV_LOOP, "PROCNETDEV: calling do proc_stat()");
 		sunow = sutime(); 
 		vdo_proc_stat = do_proc_stat(rrd_update_every, (sutime_proc_stat > 0) ? sunow - sutime_proc_stat : 0ULL);
-		
+		sutime_proc_stat = sunow;
 	}
 
 }
