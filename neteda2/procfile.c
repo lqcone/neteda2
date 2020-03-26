@@ -14,6 +14,61 @@
 #define PF_PREFIX "PROCFILE"
 
 
+#define PROCFILE_INCREMENT_BUFFER 512
+
+
+void pfwords_free(pfwords* fw) {
+	
+	free(fw);
+}
+
+
+void pflines_free(pflines *fl){
+
+	free(fl);
+}
+
+
+void procfile_close(procfile* ff) {
+	debug(D_PROCFILE, PF_PREFIX, ": Closing file %s .",ff->filename);
+	if (ff->lines) pflines_free(ff->lines);
+	if (ff->words) pfwords_free(ff->words);
+	if (ff->fd != -1) close(ff->fd);
+	free(ff);
+
+}
+
+
+procfile* procfile_readall(procfile* ff) {
+	debug(D_PROCFILE, PF_PREFIX, ":Reading file %s.", ff->filename);
+
+	ssize_t t, s, r = 1, x;
+	ff->len = 0;
+
+	while (r > 0) {
+		s = ff->len;
+		x = ff->size - s;
+		if(!x){
+			debug(D_PROCFILE, PF_PREFIX, ": Expanding  data buffer for file %s.", ff->filename);
+
+			procfile* new = realloc(ff, sizeof(procfile) + ff->size + PROCFILE_INCREMENT_BUFFER);
+			if (!new) {
+				error(PF_PREFIX, ": Cannot allocate memory for file %s", ff->filename);
+				procfile_close(ff);
+				return NULL;				
+			}
+			ff = new;
+			ff->size += PROCFILE_INCREMENT_BUFFER;
+		}
+		debug(D_PROCFILE, "Reading file %s from position ld% with length %ld", ff->filename, s, ff->size - s);
+		r = read(ff->fd, &ff->data[s], ff->size - s);
+		if (r == -1) {
+
+		}
+	}
+}
+
+
 
 procfile* procfile_open(const char *filename) {
 	debug(D_PROCFILE,PF_PREFIX": Opening file is %s",filename);
@@ -26,6 +81,4 @@ procfile* procfile_open(const char *filename) {
 
 	debug(D_PROCFILE, "File %s opened.", filename);
 	return ff;
-
-
 }

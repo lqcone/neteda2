@@ -35,3 +35,4 @@ typedef struct {
 
 
 extern procfile* procfile_open(const char* filename);
+extern procfile* procfile_readall(procfile* ff);
