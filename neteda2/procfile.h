@@ -1,4 +1,4 @@
-
+#include<stdint.h>
 
 typedef struct{
 	uint32_t len;
@@ -30,3 +30,8 @@ typedef struct {
 	char separators[256];
 	char data[];
 } procfile;
+
+
+
+
+extern procfile* procfile_open(const char* filename);
