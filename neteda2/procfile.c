@@ -17,11 +17,19 @@
 #define PROCFILE_INCREMENT_BUFFER 512
 
 
+void pfwords_reset(pfwords* fw) {
+	fw->len = 0;
+}
+
 void pfwords_free(pfwords* fw) {
 	
 	free(fw);
 }
 
+
+void pflines_reset(pflines* fl) {
+	fl->len = 0;
+}
 
 void pflines_free(pflines *fl){
 
@@ -63,9 +71,26 @@ procfile* procfile_readall(procfile* ff) {
 		debug(D_PROCFILE, "Reading file %s from position ld% with length %ld", ff->filename, s, ff->size - s);
 		r = read(ff->fd, &ff->data[s], ff->size - s);
 		if (r == -1) {
-
+			procfile_close(ff);
+			return NULL;
 		}
+		ff->len += r;
+
 	}
+	debug(D_PROCFILE, "Rewinding file %s", ff->filename);
+	if (lseek(ff->fd, 0, SEEK_SET) == -1) {
+		procfile_close(ff);
+		return NULL;
+	}
+	pflines_reset(ff->lines);
+	pfwords_reset(ff->words);
+
+
+
+
+	debug(D_PROCFILE, "File %s updated", ff->filename);
+	retrun NULL;
+
 }
 
 

@@ -1,3 +1,4 @@
+#include<pthread.h>
 #include<sys/time.h>
 
 
@@ -5,6 +6,7 @@
 #include"log.h"
 #include"plugin_proc.h"
 #include"rrd.h"
+#include"main.h"
 
 
 unsigned long long sutime(){
@@ -17,7 +19,7 @@ void* proc_main(void* ptr){
 	
 	//if (ptr) { ; }
 	
-	int vdo_proc_stat = 1;
+	int vdo_proc_stat = 0;
 	unsigned long long sunow;
 
 	unsigned long long sutime_proc_stat = 0ULL;
@@ -30,10 +32,14 @@ void* proc_main(void* ptr){
 	}
 
 	for (; 1;) {
-		debug(D_PROCNETDEV_LOOP, "PROCNETDEV: calling do proc_stat()");
-		sunow = sutime(); 
-		vdo_proc_stat = do_proc_stat(rrd_update_every, (sutime_proc_stat > 0) ? sunow - sutime_proc_stat : 0ULL);
-		sutime_proc_stat = sunow;
+		if (!vdo_proc_stat) {
+			debug(D_PROCNETDEV_LOOP, "PROCNETDEV: calling do proc_stat()");
+			sunow = sutime();
+			vdo_proc_stat = do_proc_stat(rrd_update_every, (sutime_proc_stat > 0) ? sunow - sutime_proc_stat : 0ULL);
+			sutime_proc_stat = sunow;
+		}
+		if (!netdata_exit) break;
 	}
-
+	pthread_exit(NULL);
+	return NULL;
 }

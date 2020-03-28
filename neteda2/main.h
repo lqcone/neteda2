@@ -1,0 +1,1 @@
+extern int netdata_exit;
