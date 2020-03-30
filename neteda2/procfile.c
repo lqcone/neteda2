@@ -13,9 +13,23 @@
 
 #define PF_PREFIX "PROCFILE"
 
+#define PFWORDS_INCREASE_STEP 200
+#define PFLINES_INCREASE_STEP 10
 
 #define PROCFILE_INCREMENT_BUFFER 512
 
+
+pfwords* pfwords_new() {
+	uint32_t size = PFWORDS_INCREASE_STEP;
+
+	pfwords* new = malloc(sizeof(pfwords) + size * sizeof(char*));
+	if (!new) return NULL;
+
+	new->len = 0;
+	new->size = size;
+	return new;
+
+}
 
 void pfwords_reset(pfwords* fw) {
 	fw->len = 0;
@@ -26,6 +40,18 @@ void pfwords_free(pfwords* fw) {
 	free(fw);
 }
 
+
+pflines* pflines_new() {
+	uint32_t size = PFLINES_INCREASE_STEP;
+
+	pfwords* new = malloc(sizeof(pflines) + size * sizeof(char*));
+	if (!new) return NULL;
+
+	new->len = 0;
+	new->size = size;
+	return new;
+
+}
 
 void pflines_reset(pflines* fl) {
 	fl->len = 0;
@@ -89,7 +115,7 @@ procfile* procfile_readall(procfile* ff) {
 
 
 	debug(D_PROCFILE, "File %s updated", ff->filename);
-	return NULL;
+	return ff;
 
 }
 
@@ -103,6 +129,9 @@ procfile* procfile_open(const char *filename) {
 	ff->filename[FILENAME_MAX] = "\0";
 
 	ff->fd = fd;
+
+	ff->lines = pflines_new();
+	ff->words = pfwords_new();
 
 	debug(D_PROCFILE, "File %s opened.", filename);
 	return ff;

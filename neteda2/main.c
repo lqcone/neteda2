@@ -8,7 +8,7 @@
 
 
 
-int netdata_exit = 0;
+int netdata_exit = 1;
 
 struct netdata_static_thread {
 	char *name;

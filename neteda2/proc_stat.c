@@ -14,5 +14,7 @@ int do_proc_stat(int update_every,unsigned long long dt){
 
 	ff = procfile_readall(ff);
 	if (!ff) return 0;     //这里我们返回0，以便于下次重新尝试打开文件
+
+	uint32_t lines = procfile_lines(ff), l;
 	return 0;
 }	
