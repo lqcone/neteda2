@@ -89,7 +89,7 @@ procfile* procfile_readall(procfile* ff) {
 
 
 	debug(D_PROCFILE, "File %s updated", ff->filename);
-	retrun NULL;
+	return NULL;
 
 }
 
