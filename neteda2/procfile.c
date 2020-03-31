@@ -19,6 +19,20 @@
 #define PROCFILE_INCREMENT_BUFFER 512
 
 
+pfwords* pfwords_add(pfwords* fw, char* str) {
+	if (fw->len == fw->size) {
+		pfwords* new = realloc(fw, sizeof(pfwords) + (fw->size + PFWORDS_INCREASE_STEP) * sizeof(char*));
+		if (!new) {
+			error(PF_PREFIX": failed to expand words");
+			free(fw);
+			return NULL;
+		}
+		fw = new;
+		fw->size += PFWORDS_INCREASE_STEP;
+	}
+	fw->words[fw->len++] = str;
+	return fw;
+}
 pfwords* pfwords_new() {
 	uint32_t size = PFWORDS_INCREASE_STEP;
 
@@ -41,6 +55,22 @@ void pfwords_free(pfwords* fw) {
 }
 
 
+pflines* pflines_add(pflines* fl, uint32_t first_word) {
+	if (fl->len == fl->size) {
+		pflines* new = realloc(fl, sizeof(pflines) + (fl->size + PFLINES_INCREASE_STEP) * sizeof(ffline));
+		if (!new) {
+			error(PF_PREFIX": failed to expand lines");
+			free(fl);
+			return NULL;
+		}
+		fl = new;
+		fl->size += PFLINES_INCREASE_STEP;
+	}
+	fl->lines[fl->len].words = 0;
+	fl->lines[fl->len++].first = first_word;
+
+	return fl;
+}
 pflines* pflines_new() {
 	uint32_t size = PFLINES_INCREASE_STEP;
 
@@ -63,6 +93,14 @@ void pflines_free(pflines *fl){
 }
 
 
+
+#define PF_CHAR_IS_SEPARATOR	' '
+#define PF_CHAR_IS_NEWLINE		'N'
+#define PF_CHAR_IS_WORD			'W'
+#define PF_CHAR_IS_QUOTE        'Q'
+#define PF_CHAR_IS_OPEN         'O'
+#define PF_CHAR_IS_CLOSE        'C'
+
 void procfile_close(procfile* ff) {
 	debug(D_PROCFILE, PF_PREFIX, ": Closing file %s .",ff->filename);
 	if (ff->lines) pflines_free(ff->lines);
@@ -70,6 +108,38 @@ void procfile_close(procfile* ff) {
 	if (ff->fd != -1) close(ff->fd);
 	free(ff);
 
+}
+
+procfile* procfile_parser(procfile* ff) {
+	debug(D_PROCFILE, PF_PREFIX": Parsing file %s", ff->filename);
+
+	char* s = ff->data, * e = &ff->data[ff->len], * t = ff->data, quote = 0;
+	uint32_t l = 0, w = 0;
+	int opened = 0;
+
+	ff->lines = pflines_add(ff->lines, w);
+	if (!ff -> lines) goto cleanup;
+	s = e;     
+	if (s > t&&t<e) {
+		if (ff->len < ff->size)
+			*s = '\0';
+		else {
+			ff -> data[ff->size - 1] = '\0';
+		}
+
+		ff->words = pfwords_add(ff->words, t);
+		if (!ff->words) goto cleanup;
+		
+		ff->lines->lines[l].words++;
+		
+	}
+	
+	return ff;
+
+cleanup:
+	error(PF_PREFIX ": Failed to parse file %s", ff->filename);
+	procfile_close(ff);
+	return NULL;
 }
 
 
@@ -111,7 +181,7 @@ procfile* procfile_readall(procfile* ff) {
 	pflines_reset(ff->lines);
 	pfwords_reset(ff->words);
 
-
+	ff = procfile_parser(ff);
 
 
 	debug(D_PROCFILE, "File %s updated", ff->filename);

@@ -39,13 +39,13 @@ extern procfile* procfile_readall(procfile* ff);
 #define procfile_lines(ff) (ff->lines->len)
 
 //return the number of words of the Nth line
-#define procfile_words(ff,line) (((line)<procfile_lines(ff))?(ff)->lines->lines[line].word:0)
+#define procfile_linewords(ff,line) (((line)<procfile_lines(ff))?(ff)->lines->lines[line].words:0)
 
 //rethren the Nth word of the file, or empty string
-#define procfile_word(ff,word) (((word)<(ff)->words->len) ? (ff)->words-words[word]:"")
+#define procfile_word(ff,word) (((word)<(ff)->words->len) ? (ff)->words->words[word]:"")
 
 //return the first word of the Nth line,or empty string
 #define procfile_line(ff,line) (((line)<procfile_lines(ff)) ? procfile_word(ff,ff->lines->lines[(line)].first):"")
 
 //return the Nth word of the current line
-#define procfile_lineword(ff,line,word) (((line)<procfile_lines(ff) && (word)<procfile_words(ff,(line)) ? procfile_word((ff),(ff)->lines-lines[line].first+word):"")
+#define procfile_lineword(ff,line,word) (((line)<procfile_lines(ff) && (word)<procfile_linewords(ff,(line))) ? procfile_word((ff),(ff)->lines->lines[line].first+word):"")
