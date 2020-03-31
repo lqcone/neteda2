@@ -10,7 +10,7 @@ int do_proc_stat(int update_every,unsigned long long dt){
 	if (!ff) {
 		char filename[FILENAME_MAX + 1];
 		snprintf(filename,FILENAME_MAX,"%s%s",global_host_prefix,"/proc/stat" );
-		ff = procfile_open("/proc/stat");
+		ff = procfile_open("/proc/stat","\t:");
 	}
 	if (!ff) return 1;
 

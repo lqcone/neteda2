@@ -32,7 +32,7 @@ typedef struct {
 
 
 
-extern procfile* procfile_open(const char* filename);
+extern procfile* procfile_open(const char* filename,const char *separators);
 extern procfile* procfile_readall(procfile* ff);
 
 // return the number of lines present

@@ -51,7 +51,6 @@ void main()
 		}
 		else info("Not starting thread %s.", st->name);
 	}
-	
 	for (;;) {
 		sleep(1);
 	}

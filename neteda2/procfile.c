@@ -6,6 +6,7 @@
 #include<sys/stat.h>
 #include<fcntl.h>
 #include<string.h>
+#include<ctype.h>
 
 #include"procfile.h"
 #include"log.h"
@@ -189,9 +190,31 @@ procfile* procfile_readall(procfile* ff) {
 
 }
 
+static void procfile_set_separators(procfile* ff, const char* separators) {
+	static char def[256] = { [0 ... 255] = 0 };
+	int i;
+	if (!def[255]) {
+		for (i = 0; i < 256; i++) {
+			if (i == '\n' || i == '\r') def[i] = PF_CHAR_IS_NEWLINE;
+			else if (isspace(i) || !isprint(i)) def[i] = PF_CHAR_IS_SEPARATOR;
+			else def[i] = PF_CHAR_IS_WORD;
+		}
+	}
+	//copy the default
+	char* ffs = ff->separators, *ffd = def, *ffe = &def[256];
+	while (ffd != ffe) *ffs++ = *ffd ++ ;
+
+	if (!separators)
+		separators = "\t=l";
+
+	ffs = ff->separators;
+	const char* s=separators;
+	while (*s)
+		ffs[(int)*s++] = PF_CHAR_IS_SEPARATOR;
+}
 
 
-procfile* procfile_open(const char *filename) {
+procfile* procfile_open(const char *filename,const char *separators) {
 	debug(D_PROCFILE,PF_PREFIX": Opening file is %s",filename);
 	int fd = open(filename,O_RDONLY,0666);
 	procfile* ff = malloc(sizeof(procfile));
@@ -202,6 +225,8 @@ procfile* procfile_open(const char *filename) {
 
 	ff->lines = pflines_new();
 	ff->words = pfwords_new();
+
+	procfile_set_separators(ff, separators);
 
 	debug(D_PROCFILE, "File %s opened.", filename);
 	return ff;
