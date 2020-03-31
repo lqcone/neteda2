@@ -34,6 +34,7 @@ struct netdata_static_thread static_threads[] = {
 void main()
 {
 	int i;
+
 	for (i = 0; static_threads[i].name != NULL; i++) {
 		struct netdata_static_thread* st = &static_threads[i];
 		if (st->enabled) {
@@ -51,6 +52,7 @@ void main()
 		}
 		else info("Not starting thread %s.", st->name);
 	}
+
 	for (;;) {
 		sleep(1);
 	}

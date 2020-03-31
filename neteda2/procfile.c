@@ -120,7 +120,56 @@ procfile* procfile_parser(procfile* ff) {
 
 	ff->lines = pflines_add(ff->lines, w);
 	if (!ff -> lines) goto cleanup;
-	s = e;     
+
+	while (s < e) {
+		switch (ff->separators[(int)*s]) {
+		case PF_CHAR_IS_SEPARATOR:
+			if (quote || opened) {
+				s++;
+				continue;
+			}
+			if (s == t) {
+				t = ++s;
+				continue;
+			}
+			*s = '\0';
+
+			ff->words = pfwords_add(ff->words, t);
+			if (!ff->words) goto cleanup;
+
+			ff->lines->lines[l].words++;
+			w++;
+
+			t = ++s;
+			continue;
+
+		case PF_CHAR_IS_NEWLINE:
+			// end of line
+			*s = '\0';
+
+			ff->words = pfwords_add(ff->words, t);
+			if (!ff->words) goto cleanup;
+
+			ff->lines->lines[l].words++;
+			w++;
+
+			// debug(D_PROCFILE, PF_PREFIX ":	ended line %d with %d words", l, ff->lines->lines[l].words);
+
+			ff->lines = pflines_add(ff->lines, w);
+			if (!ff->lines) goto cleanup;
+			l++;
+
+			t = ++s;
+			continue;
+
+		default:
+			s++;
+			continue;
+
+		}
+	}
+
+	 
 	if (s > t&&t<e) {
 		if (ff->len < ff->size)
 			*s = '\0';
