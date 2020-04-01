@@ -4,6 +4,7 @@
 #include<stdlib.h>
 #include "log.h"
 #include"plugin_proc.h"
+#include"web_server.h"
 
 
 
@@ -26,6 +27,8 @@ struct netdata_static_thread {
 
 struct netdata_static_thread static_threads[] = {
 	{"proc",		"plugins",	"proc",			1, NULL, NULL,	proc_main},
+
+    {"web",          NULL,       NULL,          1, NULL, NULL,socket_listen_main},
 	{NULL,			 NULL,		 NULL,			0, NULL, NULL,  NULL}          //地址占用，确保不能访问其他变量地址
 };
 
@@ -34,6 +37,17 @@ struct netdata_static_thread static_threads[] = {
 void main()
 {
 	int i;
+
+
+	{
+		if (listen_fd < 0) {
+			listen_fd = create_listen_socket4();
+			
+
+
+		}
+	}
+
 
 	for (i = 0; static_threads[i].name != NULL; i++) {
 		struct netdata_static_thread* st = &static_threads[i];

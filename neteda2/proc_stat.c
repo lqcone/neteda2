@@ -11,7 +11,7 @@
 
 int do_proc_stat(int update_every,unsigned long long dt){
 	static procfile* ff = NULL;
-	static int do_cpu = 1   //do_cpu_cores = -1;
+	static int do_cpu = 1;   //do_cpu_cores = -1;
 	if (!ff) {
 		char filename[FILENAME_MAX + 1];
 		snprintf(filename,FILENAME_MAX,"%s%s",global_host_prefix,"/proc/stat" );
@@ -47,7 +47,7 @@ int do_proc_stat(int update_every,unsigned long long dt){
 				type = "system";
 			}
 			if (isthistotal && do_cpu) {
-				st=rrd_set
+				//st=rrd_set
 			}
 
 

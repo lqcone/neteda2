@@ -8,4 +8,4 @@ extern int rrd_update_every;
 
 
 
-extern
+//extern
