@@ -50,4 +50,7 @@ void* socket_listen_main(void* ptr) {
 
 	info("WEB SERVER thread created with task id %d", gettid());
 
+	if (listen_fd < 0) fatal("LISTENER: Listen socket is not ready.");
+
+
 }
