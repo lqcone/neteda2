@@ -7,6 +7,9 @@
 #include"web_server.h"
 
 
+int listen_baklog = LISTEN_BACKLOG;
+int listen_port = LISTEN_PORT;
+
 
 
 int netdata_exit = 1;
@@ -41,7 +44,7 @@ void main()
 
 	{
 		if (listen_fd < 0) {
-			listen_fd = create_listen_socket4();
+			listen_fd = create_listen_socket4(listen_port,listen_baklog);
 			
 
 
