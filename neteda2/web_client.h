@@ -1,6 +1,17 @@
+#include"web_buffer.h"
+
+
 
 
 #define DEFAULT_DISCONNECT_IDLE_WEB_CLIENTS_AFTER_SECOND 60
+
+struct response {
+	BUFFER* header;
+	BUFFER* header_output;
+	BUFFER* data;
+};
+
+
 
 struct web_client{
 
@@ -13,6 +24,8 @@ struct web_client{
 
 	int ifd;
 	int ofd;
+
+	struct response response;
 
 	int wait_receive;
 	int wait_send;

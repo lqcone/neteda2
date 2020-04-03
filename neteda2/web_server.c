@@ -51,7 +51,7 @@ int create_listen_socket4(int port,int listen_backlog) {
 
 void* socket_listen_main(void* ptr) {
 
-	
+
 	struct web_client* w;
 	struct timeval tv;
 	int retval;

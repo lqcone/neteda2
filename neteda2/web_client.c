@@ -7,7 +7,10 @@
 
 #include"web_client.h"
 #include"log.h"
+#include"web_buffer.h"
 
+
+#define INITAL_WEB_DATA_LENGTH 16384
 
 int web_client_timeout = DEFAULT_DISCONNECT_IDLE_WEB_CLIENTS_AFTER_SECOND;
 
@@ -50,6 +53,14 @@ struct web_client* web_client_create(int listener) {
 
 	}
 
+	w->response.data = buffer_create(INITAL_WEB_DATA_LENGTH);
+	if (!w->response.data) {
+		close(w->ifd);
+		free(w);
+		return NULL;
+	}
+
+
 
 	w->wait_receive = 1;
 	return w;
@@ -69,8 +80,15 @@ void web_client_process(struct web_client *w){
 
 
 long web_client_receive(struct web_client* w) {
+	
+	long left = w->response.data->size - w->response.data->len;
 	long bytes;
 
+	bytes = recv(w->ifd, &w->response.data->buffer[w->response.data->len], (size_t)(left - 1), MSG_DONTWAIT);
+	if (bytes > 0) {
+		w->response.data->len += bytes;
+		w->response.data->buffer[w->response.data->len] = '\0';
+	}
 
 		return bytes;
 }
