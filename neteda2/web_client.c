@@ -5,6 +5,10 @@
 #include<sys/select.h>
 #include<sys/time.h>
 #include<string.h>
+#include<sys/stat.h>
+#include<sys/types.h>
+#include<fcntl.h>
+#include<errno.h>
 
 #include"web_client.h"
 #include"log.h"
@@ -77,9 +81,44 @@ struct web_client* web_client_free(struct web_client* w) {
 	return w;
 }
 
+int mysendfile(struct web_client* w, char* filename) {
+	static char* web_dir = NULL;
+	if (!web_dir) web_dir = "./";
+
+	while (*filename == '/') filename++;
+
+	char webfilename[FILENAME_MAX + 1];
+	snprintf(webfilename, FILENAME_MAX, "%s/%s", web_dir, filename);
+	struct stat stat;
+	if (lstat(webfilename, &stat) != 0) {
+		return 404;
+	}
+
+	if ((stat.st_mode & S_IFMT) == S_IFDIR) {
+		snprintf(webfilename, FILENAME_MAX + 1, "%s/index.html", filename);
+		return mysendfile(w, webfilename);
+	}
+
+	//open the file
+	w->ifd = open(webfilename, O_NONBLOCK, O_RDONLY);
+	if (w->ifd == -1) {
+		w->ifd = w->ofd;
+		if (errno == EBUSY || errno == EAGAIN) {
+			return 307;
+		}
+
+		else {
+			return 404;
+		}
+	}
+
+	return 200;
+}
+
 
 void web_client_process(struct web_client *w){
 	
+	int code = 500;
 
 	if (strstr(w->response.data->buffer, "\r\n\r\n")) {
 		char* buf = (char*)buffer_tostring(w->response.data);
@@ -107,7 +146,7 @@ void web_client_process(struct web_client *w){
 				filename[FILENAME_MAX] = '\0';
 				tok = mystrsep(&url, "?");
 				buffer_flush(w->response.data);
-				code=
+				code = mysendfile(w, (tok && *tok) ? tok : "/");
 			}
 		}
 
