@@ -4,6 +4,15 @@
 #include"web_buffer.h"
 #include"log.h"
 
+
+const char* buffer_tostring(BUFFER* wb) {
+	
+	wb->buffer[wb->len] = '\0';
+	return(wb->buffer);
+}
+
+
+
 BUFFER* buffer_create(long size) {
 
 	BUFFER* b;

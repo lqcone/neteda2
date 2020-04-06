@@ -5,6 +5,13 @@
 
 #define DEFAULT_DISCONNECT_IDLE_WEB_CLIENTS_AFTER_SECOND 60
 
+#ifndef NETDATA_WEB_CLIENT_H
+#define NETDATA_WEB_CLIENT_H 1
+
+
+#define URL_MAX 8192
+
+
 struct response {
 	BUFFER* header;
 	BUFFER* header_output;
@@ -16,6 +23,8 @@ struct response {
 struct web_client{
 
 	unsigned long long id;
+
+	char last_url[URL_MAX + 1];
 
 	struct sockaddr_storage clientaddr;
 
@@ -43,3 +52,6 @@ extern struct web_client* web_client_free(struct web_client* w);
 
 
 extern void* web_client_main(void* ptr);
+
+
+#endif

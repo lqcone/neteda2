@@ -90,7 +90,7 @@ void* socket_listen_main(void* ptr) {
 				w = web_client_create(listen_fd);
 				if (!w) continue;
 
-				if (pthread_create(w->pthread, NULL, web_client_main, w) != 0) {
+				if (pthread_create(&w->pthread, NULL, web_client_main, w) != 0) {
 					error("%llu:failed to create new thread for web client.");
 					w->obsolete = 1;
 				}

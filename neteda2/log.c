@@ -167,7 +167,7 @@ void error_int(const char *prefix,const char* file, const char* function, const 
 	if (errno) {
 		char buff[200];
 		char* s = strerror_r(errno, buff, 200);
-		fprintf(stderr, " ((errno %d,%s)\n", errno, s);
+		fprintf(stderr, " ((errno %d,%s)\n", errno, buff);
 		errno = 0;
 	}
 	else fprintf(stderr, "\n");

@@ -2,9 +2,12 @@
 #include<syslog.h>
 #include<pthread.h>
 #include<stdlib.h>
+#include<string.h>
+
 #include "log.h"
 #include"plugin_proc.h"
 #include"web_server.h"
+#include"strsep.h"
 
 
 int listen_baklog = LISTEN_BACKLOG;
@@ -36,12 +39,18 @@ struct netdata_static_thread static_threads[] = {
 };
 
 
-
 void main()
 {
 	int i;
+/*	char* s;
+	const char *sep = " ";
+	char buff[100] = { "User - Agent:Mozilla / 5.0 (Windows NT 10.0; Win64" };
+	s = buff;
+	char* tok = strsep_lqc(&s, sep);	
+	printf("%s\n", tok);
+*/
 
-
+	
 	{
 		if (listen_fd < 0) {
 			listen_fd = create_listen_socket4(listen_port,listen_baklog);
@@ -73,6 +82,6 @@ void main()
 	for (;;) {
 		sleep(1);
 	}
-
+	
     
 }

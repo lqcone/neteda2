@@ -76,6 +76,11 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <RemoteLdToolExe>gcc</RemoteLdToolExe>
+    <RemoteCCompileToolExe>gcc</RemoteCCompileToolExe>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+    <RemoteCCompileToolExe>g++</RemoteCCompileToolExe>
+    <RemoteCppCompileToolExe>g++</RemoteCppCompileToolExe>
   </PropertyGroup>
   <ItemGroup>
     <ClCompile Include="common.c" />
@@ -85,6 +90,8 @@
     <ClCompile Include="procfile.c" />
     <ClCompile Include="proc_stat.c" />
     <ClCompile Include="rrd.c" />
+    <ClCompile Include="strsep.c" />
+    <ClCompile Include="url.c" />
     <ClCompile Include="web_buffer.c" />
     <ClCompile Include="web_client.c" />
     <ClCompile Include="web_server.c" />
@@ -96,6 +103,8 @@
     <ClInclude Include="plugin_proc.h" />
     <ClInclude Include="procfile.h" />
     <ClInclude Include="rrd.h" />
+    <ClInclude Include="strsep.h" />
+    <ClInclude Include="url.h" />
     <ClInclude Include="web_buffer.h" />
     <ClInclude Include="web_client.h" />
     <ClInclude Include="web_server.h" />
@@ -105,10 +114,28 @@
     <ClCompile>
       <AdditionalOptions>
       </AdditionalOptions>
+      <CLanguageStandard>c99</CLanguageStandard>
+      <CppLanguageStandard>c++98</CppLanguageStandard>
     </ClCompile>
     <Link>
       <LibraryDependencies>pthread;%(LibraryDependencies)</LibraryDependencies>
     </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+    <ClCompile>
+      <CLanguageStandard>c99</CLanguageStandard>
+      <CppLanguageStandard>c++98</CppLanguageStandard>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+    <ClCompile>
+      <CLanguageStandard>c99</CLanguageStandard>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+    <ClCompile>
+      <CppLanguageStandard>c++98</CppLanguageStandard>
+    </ClCompile>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

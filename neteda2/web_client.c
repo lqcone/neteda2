@@ -4,10 +4,14 @@
 #include<pthread.h>
 #include<sys/select.h>
 #include<sys/time.h>
+#include<string.h>
 
 #include"web_client.h"
 #include"log.h"
 #include"web_buffer.h"
+#include"strsep.h"
+#include"url.h"
+#include"common.h"
 
 
 #define INITAL_WEB_DATA_LENGTH 16384
@@ -21,7 +25,7 @@ unsigned long long web_clients_count = 0;
 
 struct web_client* web_client_create(int listener) {
 	struct web_client* w;
-
+	info("web_client_create started.");
 	w = calloc(1, sizeof(struct web_client));
 	if (!w) {
 		error("Cannot allocate new web_client memory .");
@@ -49,7 +53,7 @@ struct web_client* web_client_create(int listener) {
 		w->next = web_clients;
 		web_clients = w;
 
-		return w;
+
 
 	}
 
@@ -75,6 +79,39 @@ struct web_client* web_client_free(struct web_client* w) {
 
 
 void web_client_process(struct web_client *w){
+	
+
+	if (strstr(w->response.data->buffer, "\r\n\r\n")) {
+		char* buf = (char*)buffer_tostring(w->response.data);
+		char* url = NULL;
+		
+		char *tok = strsep_lqc(&buf, " \r\n");
+		if (buf&&strcmp(tok, "GET") == 0) {
+			tok = strsep_lqc(&buf, " \r\n");
+			url = url_decode(tok);
+		}
+
+		w->last_url[0] = '\0';
+
+		if (url) {
+			strncpy(w->last_url, url, URL_MAX);
+			w->last_url[URL_MAX] = '\0';
+			tok = mystrsep(&url, "/?");
+			if (tok && *tok) {
+				info("tok and *tok is not NULL.");
+			}
+			else {
+				char filename[FILENAME_MAX + 1];
+				url = filename;
+				strncpy(filename, w->last_url, FILENAME_MAX);
+				filename[FILENAME_MAX] = '\0';
+				tok = mystrsep(&url, "?");
+				buffer_flush(w->response.data);
+				code=
+			}
+		}
+
+	}
 
 }
 
@@ -112,6 +149,8 @@ void* web_client_main(void* ptr) {
 	fd_set ifds, ofds, efds;
 	int fdmax = 0;
 
+	//info("web_client_main started");
+	
 	for (;;) {
 		FD_ZERO(&ifds);
 		FD_ZERO(&ofds);
@@ -126,7 +165,11 @@ void* web_client_main(void* ptr) {
 		tv.tv_sec = web_client_timeout;
 		tv.tv_usec = 0;
 
+		info("waiting for input data with select().");
+
 		retval = select(fdmax + 1, &ifds, &ofds, &efds,&tv);
+
+		info("func select() end");
 
 		if (retval == -1) { continue; }
 		
@@ -147,6 +190,10 @@ void* web_client_main(void* ptr) {
 	}
 	
 	w->obsolete = 1;
+
+	//info("web_client_main end.");
+
+
 	return NULL;
 
 }
