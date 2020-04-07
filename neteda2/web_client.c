@@ -127,6 +127,7 @@ int mysendfile(struct web_client* w, char* filename) {
 void web_client_process(struct web_client *w){
 	
 	int code = 500;
+	ssize_t bytes;
 
 	if (strstr(w->response.data->buffer, "\r\n\r\n")) {
 		char* buf = (char*)buffer_tostring(w->response.data);
@@ -160,6 +161,7 @@ void web_client_process(struct web_client *w){
 
 	}
 
+
 }
 
 
@@ -187,11 +189,18 @@ long web_client_receive(struct web_client* w) {
 		w->response.data->len += bytes;
 		w->response.data->buffer[w->response.data->len] = '\0';
 		
-		if (w->mode = WEB_CLIENT_MODE_FILECOPY) {
+		if (w->mode == WEB_CLIENT_MODE_FILECOPY) {
 			w->wait_send = 1;
 			if (w->response.rlen && w->response.data->len >= w->response.rlen)
 				w->wait_receive = 0;
 
+		}
+	}
+	else if (bytes == 0) {
+
+		if (w->mode = WEB_CLIENT_MODE_FILECOPY) {
+			
+			w->wait_receive = 0;
 		}
 	}
 
@@ -218,18 +227,25 @@ void* web_client_main(void* ptr) {
 
 		FD_SET(w->ifd, &efds);
 
+		if (w->ifd != w->ofd)
+			FD_SET(w->ofd, &efds);
+
 		if (w->wait_receive) {
 			FD_SET(w->ifd, &ifds);
 			if (w->ifd > fdmax) fdmax = w->ifd;
 		}
+
+		if (w->wait_send) {
+			FD_SET(w->ofd, &ofds);
+			if (w->ofd > fdmax) fdmax = w->ofd;
+		}
+
 		tv.tv_sec = web_client_timeout;
 		tv.tv_usec = 0;
 
-		info("waiting for input data with select().");
 
 		retval = select(fdmax + 1, &ifds, &ofds, &efds,&tv);
 
-		info("func select() end");
 
 		if (retval == -1) { continue; }
 		
