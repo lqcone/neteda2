@@ -26,6 +26,7 @@
     <ClInclude Include="web_buffer.h" />
     <ClInclude Include="web_client.h" />
     <ClInclude Include="web_server.h" />
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="web">
@@ -33,7 +34,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="index.htm">
+    <None Include="index.html">
       <Filter>web</Filter>
     </None>
   </ItemGroup>

@@ -8,6 +8,9 @@
 #ifndef NETDATA_WEB_CLIENT_H
 #define NETDATA_WEB_CLIENT_H 1
 
+#define WEB_CLIENT_MODE_NORMAL      0
+#define	WEB_CLIENT_MODE_FILECOPY    1
+#define WEB_CLIENT_MODE_OPTIONS		2
 
 #define URL_MAX 8192
 
@@ -16,6 +19,9 @@ struct response {
 	BUFFER* header;
 	BUFFER* header_output;
 	BUFFER* data;
+
+	size_t rlen;              //如果设置为非0，表示ifd期待的大小
+	size_t sent;              //当前已发送数据长度
 };
 
 
@@ -25,6 +31,8 @@ struct web_client{
 	unsigned long long id;
 
 	char last_url[URL_MAX + 1];
+
+	int mode;
 
 	struct sockaddr_storage clientaddr;
 

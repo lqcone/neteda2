@@ -37,6 +37,7 @@ struct web_client* web_client_create(int listener) {
 	}
 
 	w->id = ++web_clients_count;
+	w->mode = WEB_CLIENT_MODE_NORMAL;
 
 	{
 		struct sockaddr* sadr;
@@ -51,6 +52,7 @@ struct web_client* web_client_create(int listener) {
 			free(w);
 			return NULL;
 		}
+		w->ofd = w->ifd;        //输入输出通用同一套接字
 
 
 		if (web_clients) web_clients->prev = w;
@@ -83,7 +85,7 @@ struct web_client* web_client_free(struct web_client* w) {
 
 int mysendfile(struct web_client* w, char* filename) {
 	static char* web_dir = NULL;
-	if (!web_dir) web_dir = "./";
+	if (!web_dir) web_dir = "/home/nick/projects/neteda2";
 
 	while (*filename == '/') filename++;
 
@@ -111,6 +113,12 @@ int mysendfile(struct web_client* w, char* filename) {
 			return 404;
 		}
 	}
+	w->mode = WEB_CLIENT_MODE_FILECOPY;
+	w->wait_receive = 1;
+	w->wait_send = 0;
+	buffer_flush(w->response.data);
+	w->response.rlen = stat.st_size;
+
 
 	return 200;
 }
@@ -155,29 +163,42 @@ void web_client_process(struct web_client *w){
 }
 
 
+long web_client_send(struct web_client* w) {
+	long bytes;
+
+	bytes = send(w->ofd, &w->response.data->buffer[w->response.sent], w->response.data->len - w->response.sent, MSG_DONTWAIT);
+	if (bytes > 0) {
+
+		w->response.sent += bytes;
+	}
+
+	return bytes;
+}
+
 long web_client_receive(struct web_client* w) {
 	
 	long left = w->response.data->size - w->response.data->len;
 	long bytes;
-
-	bytes = recv(w->ifd, &w->response.data->buffer[w->response.data->len], (size_t)(left - 1), MSG_DONTWAIT);
+	if (w->mode == WEB_CLIENT_MODE_FILECOPY)
+		bytes = read(w->ifd, &w->response.data->buffer[w->response.data->len], (ssize_t)(left - 1));
+	else
+		bytes = recv(w->ifd, &w->response.data->buffer[w->response.data->len], (size_t)(left - 1), MSG_DONTWAIT);
 	if (bytes > 0) {
 		w->response.data->len += bytes;
 		w->response.data->buffer[w->response.data->len] = '\0';
+		
+		if (w->mode = WEB_CLIENT_MODE_FILECOPY) {
+			w->wait_send = 1;
+			if (w->response.rlen && w->response.data->len >= w->response.rlen)
+				w->wait_receive = 0;
+
+		}
 	}
 
 		return bytes;
 }
 
-long web_client_send(struct web_client* w) {
 
-	long bytes;
-
-
-
-	return bytes;
-
-}
 
 void* web_client_main(void* ptr) {
 
@@ -218,13 +239,22 @@ void* web_client_main(void* ptr) {
 
 			break;
 		}
+		if (w->wait_send && FD_ISSET(w->ofd, &ofds)) {
+			long bytes;
+			if (bytes = web_client_send(w) < 0) {
+
+				break;
+			}
+		}
 		if (w->wait_receive && FD_ISSET(w->ifd, &ifds)) {
 			long bytes;
 			if (bytes = web_client_receive(w) < 0) {
 
 				break;
 			}
-			web_client_process(w);
+			if (w->mode == WEB_CLIENT_MODE_NORMAL) {
+				web_client_process(w);
+			}
 		}
 	}
 	
