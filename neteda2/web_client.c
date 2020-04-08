@@ -113,6 +113,8 @@ int mysendfile(struct web_client* w, char* filename) {
 			return 404;
 		}
 	}
+	if (strstr(filename, ".html") != NULL)	w->response.data->contenttype = CT_TEXT_HTML;
+
 	w->mode = WEB_CLIENT_MODE_FILECOPY;
 	w->wait_receive = 1;
 	w->wait_send = 0;
@@ -161,6 +163,50 @@ void web_client_process(struct web_client *w){
 
 	}
 
+	w->response.data->date = time(NULL);
+	w->response.code = code;
+
+	char* content_type_string;
+	switch (w->response.data->contenttype) {
+	case CT_TEXT_HTML:
+		content_type_string = "text/html; charset=utf-8";
+		break;
+	default:
+	case CT_TEXT_PLAIN:
+		content_type_string = "text/plain; charset=utf-8";
+		break;
+	}
+
+
+	char code_msg;
+	switch (code) {
+	case 200:
+		code_msg = "OK";
+		break;
+	default:
+		code_msg = "Internal Server Error";
+		break;
+	}
+
+	char date[100];
+	struct tm tmbuf, * tm = gmtime_r(&w->response.data->date, &tmbuf);
+	strftime(date, sizeof(date), "%a, %d %b %Y %H:%M:%S %Z", tm);
+
+	buffer_sprintf(w->response.header_output,
+		"HTTP/1.1 %d %s\r\n"
+		"Connection: %s\r\n"
+		"Server: NetData Embedded HTTP Server\r\n"
+		"Content-Type: %s\r\n"
+		"Access-Control-Allow-Origin: *\r\n"
+		"Access-Control-Allow-Methods: GET, OPTIONS\r\n"
+		"Access-Control-Allow-Headers: accept, x-requested-with\r\n"
+		"Access-Control-Max-Age: 86400\r\n"
+		"Date: %s\r\n"
+		, code, code_msg
+		, w->keepalive ? "keep-alive" : "close"
+		, content_type_string
+		, date
+	);
 
 }
 

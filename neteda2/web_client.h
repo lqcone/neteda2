@@ -20,6 +20,8 @@ struct response {
 	BUFFER* header_output;
 	BUFFER* data;
 
+	int code;
+
 	size_t rlen;              //如果设置为非0，表示ifd期待的大小
 	size_t sent;              //当前已发送数据长度
 };
@@ -33,6 +35,7 @@ struct web_client{
 	char last_url[URL_MAX + 1];
 
 	int mode;
+	int keepalive;
 
 	struct sockaddr_storage clientaddr;
 
