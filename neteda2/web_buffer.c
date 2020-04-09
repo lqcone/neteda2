@@ -13,6 +13,17 @@ static inline void buffer_overflow_init(BUFFER* b)
 	strcpy(&b->buffer[b->size + 1], BUFFER_OVERFLOW_EOF);
 }
 
+void buffer_reset(BUFFER* wb)
+{
+	buffer_flush(wb);
+
+	wb->contenttype = CT_TEXT_PLAIN;
+	//wb->options = 0;
+	wb->date = 0;
+
+	//buffer_overflow_check(wb);
+}
+
 const char* buffer_tostring(BUFFER* wb) {
 	
 	wb->buffer[wb->len] = '\0';

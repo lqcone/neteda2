@@ -89,6 +89,32 @@ struct web_client* web_client_create(int listener) {
 	return w;
 }
 
+void web_client_reset(struct web_client* w) {
+
+	long sent = (w->mode == WEB_CLIENT_MODE_FILECOPY) ? w->response.rlen : w->response.data->len;
+
+	long size = (w->mode == WEB_CLIENT_MODE_FILECOPY) ? w->response.rlen : w->response.data->len;
+
+	if (w->mode == WEB_CLIENT_MODE_FILECOPY) {
+
+		close(w->ifd);
+		w->ifd = w->ofd;
+	}
+	w->last_url[0] = '\0';
+
+	w->mode = WEB_CLIENT_MODE_NORMAL;
+
+	buffer_reset(w->response.header_output);
+	buffer_reset(w->response.header);
+	buffer_reset(w->response.data);
+	w->response.rlen = 0;
+	w->response.sent = 0;
+	w->response.code = 0;
+
+	w->wait_receive = 1;
+	w->wait_send = 0;
+}
+
 
 struct web_client* web_client_free(struct web_client* w) {
 
@@ -167,6 +193,16 @@ void web_client_process(struct web_client *w){
 				if (strcmp(tok, "api") == 0) {
 
 				}
+
+				else {
+					char filename[FILENAME_MAX + 1];
+					url = filename;
+					strncpy(filename, w->last_url, FILENAME_MAX);
+					filename[FILENAME_MAX] = '\0';
+					tok = mystrsep(&url, "?");
+					buffer_flush(w->response.data);
+					code = mysendfile(w, (tok && *tok) ? tok : "/");
+				}
 			}
 			else {
 				char filename[FILENAME_MAX + 1];
@@ -178,6 +214,7 @@ void web_client_process(struct web_client *w){
 				code = mysendfile(w, (tok && *tok) ? tok : "/");
 			}
 		}
+
 
 	}
 
@@ -232,6 +269,16 @@ void web_client_process(struct web_client *w){
 
 long web_client_send(struct web_client* w) {
 	long bytes;
+
+	if (w->response.rlen - w->response.sent == 0) {
+		if (w->mode == WEB_CLIENT_MODE_FILECOPY && w->wait_receive && w->ifd != w->ofd && w->response.rlen && w->response.rlen > w->response.data->len) {
+			// we have to wait, more data will come
+			w->wait_send = 0;
+			return(0);
+		}
+		web_client_reset(w);
+		return 0;
+	}
 
 	bytes = send(w->ofd, &w->response.data->buffer[w->response.sent], w->response.data->len - w->response.sent, MSG_DONTWAIT);
 	if (bytes > 0) {
