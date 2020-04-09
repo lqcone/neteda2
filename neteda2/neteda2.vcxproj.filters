@@ -33,9 +33,4 @@
       <UniqueIdentifier>{460a776f-1cde-4340-8315-c054b8744253}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="index.html">
-      <Filter>web</Filter>
-    </None>
-  </ItemGroup>
 </Project>

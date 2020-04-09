@@ -110,11 +110,6 @@
     <ClInclude Include="web_client.h" />
     <ClInclude Include="web_server.h" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="index.html">
-      <DeploymentContent>true</DeploymentContent>
-    </None>
-  </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile />
     <ClCompile>

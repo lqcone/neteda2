@@ -42,6 +42,9 @@ typedef struct web_buffer {
 #define CT_IMAGE_ICNS					20
 #define CT_IMAGE_BMP					21
 
+#define buffer_strlen(wb) ((wb)->len)
+#define buffer_need_bytes(buffer, needed_free_size) do { if((buffer)->size - (buffer)->len < (size_t)(needed_free_size)) buffer_increase((buffer), (size_t)(needed_free_size)); } while(0)
+
 
 #define buffer_flush(wb) wb->buffer[wb->len=0]='\0';
 

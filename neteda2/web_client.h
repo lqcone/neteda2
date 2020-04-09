@@ -13,6 +13,7 @@
 #define WEB_CLIENT_MODE_OPTIONS		2
 
 #define URL_MAX 8192
+#define HTTP_RESPONSE_HEADER_SIZE 4096
 
 
 struct response {

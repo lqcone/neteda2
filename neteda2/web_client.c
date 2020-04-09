@@ -19,6 +19,7 @@
 
 
 #define INITAL_WEB_DATA_LENGTH 16384
+#define WEB_REQUEST_LENGTH 16384
 
 int web_client_timeout = DEFAULT_DISCONNECT_IDLE_WEB_CLIENTS_AFTER_SECOND;
 
@@ -69,7 +70,19 @@ struct web_client* web_client_create(int listener) {
 		free(w);
 		return NULL;
 	}
+	w->response.header = buffer_create(HTTP_RESPONSE_HEADER_SIZE);
+	if (!w->response.header) {
+		close(w->ifd);
+		free(w);
+		return NULL;
+	}
 
+	w->response.header_output = buffer_create(HTTP_RESPONSE_HEADER_SIZE);
+	if (!w->response.header_output) {
+		close(w->ifd);
+		free(w);
+		return NULL;
+	}
 
 
 	w->wait_receive = 1;
@@ -85,7 +98,7 @@ struct web_client* web_client_free(struct web_client* w) {
 
 int mysendfile(struct web_client* w, char* filename) {
 	static char* web_dir = NULL;
-	if (!web_dir) web_dir = "/home/nick/projects/neteda2";
+	if (!web_dir) web_dir = "/home/nick/projects/neteda2_web";
 
 	while (*filename == '/') filename++;
 
@@ -143,12 +156,17 @@ void web_client_process(struct web_client *w){
 
 		w->last_url[0] = '\0';
 
-		if (url) {
+		if (w->mode == WEB_CLIENT_MODE_OPTIONS) {
+
+		}
+		else if (url) {
 			strncpy(w->last_url, url, URL_MAX);
 			w->last_url[URL_MAX] = '\0';
 			tok = mystrsep(&url, "/?");
 			if (tok && *tok) {
-				info("tok and *tok is not NULL.");
+				if (strcmp(tok, "api") == 0) {
+
+				}
 			}
 			else {
 				char filename[FILENAME_MAX + 1];
@@ -178,7 +196,7 @@ void web_client_process(struct web_client *w){
 	}
 
 
-	char code_msg;
+	char *code_msg;
 	switch (code) {
 	case 200:
 		code_msg = "OK";
@@ -208,6 +226,7 @@ void web_client_process(struct web_client *w){
 		, date
 	);
 
+	bytes = send(w->ofd, buffer_tostring(w->response.header_output), buffer_strlen(w->response.header_output), 0);
 }
 
 
@@ -224,7 +243,9 @@ long web_client_send(struct web_client* w) {
 }
 
 long web_client_receive(struct web_client* w) {
-	
+	// do we have any space for more data?
+	buffer_need_bytes(w->response.data, WEB_REQUEST_LENGTH);
+
 	long left = w->response.data->size - w->response.data->len;
 	long bytes;
 	if (w->mode == WEB_CLIENT_MODE_FILECOPY)

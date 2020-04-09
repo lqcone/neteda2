@@ -9,10 +9,10 @@ char* url_decode(char* str) {
 	if (!buf)
 		fatal("Cannot allocate memory.");
 	while (*pstr) {
-		if (*pstr = '%') {
+		if (*pstr == '%') {
 
 		}
-		else if (*pstr = '+') {
+		else if (*pstr == '+') {
 
 		}
 		else
