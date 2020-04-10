@@ -91,9 +91,9 @@ struct web_client* web_client_create(int listener) {
 
 void web_client_reset(struct web_client* w) {
 
-	long sent = (w->mode == WEB_CLIENT_MODE_FILECOPY) ? w->response.rlen : w->response.data->len;
+	//long sent = (w->mode == WEB_CLIENT_MODE_FILECOPY) ? w->response.rlen : w->response.data->len;
 
-	long size = (w->mode == WEB_CLIENT_MODE_FILECOPY) ? w->response.rlen : w->response.data->len;
+	//long size = (w->mode == WEB_CLIENT_MODE_FILECOPY) ? w->response.rlen : w->response.data->len;
 
 	if (w->mode == WEB_CLIENT_MODE_FILECOPY) {
 
@@ -388,6 +388,7 @@ void* web_client_main(void* ptr) {
 		}
 	}
 	
+	web_client_reset(w);
 	w->obsolete = 1;
 
 	//info("web_client_main end.");
