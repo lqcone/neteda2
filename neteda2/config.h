@@ -1,0 +1,3 @@
+
+#define NETDATA_WITH_ZLIB 1
+

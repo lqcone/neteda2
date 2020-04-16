@@ -27,6 +27,7 @@
     <ClInclude Include="web_client.h" />
     <ClInclude Include="web_server.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="config.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="web">

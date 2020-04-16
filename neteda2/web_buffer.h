@@ -50,7 +50,10 @@ typedef struct web_buffer {
 
 extern const char* buffer_tostring(BUFFER *wb);
 
+extern void buffer_strcat(BUFFER* wb, const char* txt);
+
 extern BUFFER* buffer_create(long size);
+extern void buffer_free(BUFFER* B);
 
 extern void buffer_sprintf(BUFFER* wb, const char* fmt, ...);
 

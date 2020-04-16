@@ -30,6 +30,37 @@ const char* buffer_tostring(BUFFER* wb) {
 	return(wb->buffer);
 }
 
+void buffer_strcat(BUFFER* wb, const char* txt)
+{
+	if (!txt || !*txt) return;
+
+	buffer_need_bytes(wb, (size_t)(1));
+
+	char* s = &wb->buffer[wb->len], * end = &wb->buffer[wb->size];
+	long len = wb->len;
+
+	while (*txt && s != end) {
+		*s++ = *txt++;
+		len++;
+	}
+
+	wb->len = len;
+	//buffer_overflow_check(wb);
+
+	if (*txt) {
+		debug(D_WEB_BUFFER, "strcat(): increasing web_buffer at position %ld, size = %ld\n", wb->len, wb->size);
+		len = strlen(txt);
+		buffer_increase(wb, len);
+		buffer_strcat(wb, txt);
+	}
+	else {
+		// terminate the string
+		// without increasing the length
+		buffer_need_bytes(wb, (size_t)1);
+		wb->buffer[wb->len] = '\0';
+	}
+}
+
 void buffer_vsprintf(BUFFER* wb, const char* fmt, va_list args)
 {
 	if (!fmt || !*fmt) return;
@@ -99,6 +130,11 @@ BUFFER* buffer_create(long size) {
 
 
 	return b;
+}
+
+void buffer_free(BUFFER *b) {
+	if (b->buffer) free(b->buffer);
+	free(b);
 }
 
 void buffer_increase(BUFFER* b, size_t free_size_required)

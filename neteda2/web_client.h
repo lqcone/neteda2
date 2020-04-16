@@ -1,3 +1,8 @@
+#include"config.h"
+#ifdef NETDATA_WITH_ZLIB
+#include <zlib.h>
+#endif
+
 #include"web_buffer.h"
 
 
@@ -13,6 +18,7 @@
 #define WEB_CLIENT_MODE_OPTIONS		2
 
 #define URL_MAX 8192
+#define ZLIB_CHUNK 	16384
 #define HTTP_RESPONSE_HEADER_SIZE 4096
 
 
@@ -25,6 +31,15 @@ struct response {
 
 	size_t rlen;              //如果设置为非0，表示ifd期待的大小
 	size_t sent;              //当前已发送数据长度
+	int zoutput;
+
+#ifdef NETDATA_WITH_ZLIB
+	z_stream zstream;				// zlib stream for sending compressed output to client
+	Bytef zbuffer[ZLIB_CHUNK];		// temporary buffer for storing compressed output
+	long zsent;						// the compressed bytes we have sent to the client
+	long zhave;						// the compressed bytes that we have to send
+	int zinitialized;
+#endif
 };
 
 

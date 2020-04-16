@@ -96,13 +96,18 @@ void* socket_listen_main(void* ptr) {
 				}
 
 				//cleanup unused client
-				for (w = web_clients; w; w = w ? w->next : NULL) {
-					if (w->obsolete = 1) {
-						w = web_client_free(w);
-					}
-				}
+				
 			}
 		}
+
+		for (w = web_clients; w; w = w ? w->next : NULL) {
+			//info("checking web client %d", w->id);
+			if (w->obsolete) {
+				info("free web client %d", w->id);
+				w = web_client_free(w);
+			}
+		}
+
 	}
 
 
