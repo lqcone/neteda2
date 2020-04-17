@@ -470,6 +470,7 @@ void web_client_process(struct web_client *w){
 			"Transfer-Encoding: chunked\r\n"
 		);
 	}
+	buffer_strcat(w->response.header_output, "\r\n");     //报文头内容结束
 	
 	// disable TCP_NODELAY, to buffer the header
 	int flag = 0;
