@@ -1,3 +1,2 @@
 
-#define NETDATA_WITH_ZLIB 1
-
+//#define NETDATA_WITH_ZLIB 1

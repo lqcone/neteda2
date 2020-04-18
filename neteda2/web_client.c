@@ -19,6 +19,7 @@
 #include"url.h"
 #include"common.h"
 #include"config.h"
+#include"rrd2json.h"
 
 
 #define INITAL_WEB_DATA_LENGTH 16384
@@ -53,7 +54,7 @@ struct web_client* web_client_create(int listener) {
 
 		w->ifd = accept(listener, sadr, &addrlen);
 		if (w->ifd == -1) {
-			error("%llu: Cannot accept  newo incoming connection.",w->id);
+			error("Cannot accept  newo incoming connection.",w->id);
 			free(w);
 			return NULL;
 		}
@@ -62,7 +63,7 @@ struct web_client* web_client_create(int listener) {
 
 		int flag = 1;
 		if(setsockopt(w->ifd,SOL_SOCKET,SO_KEEPALIVE,(char *) &flag,sizeof(int))!=0)
-			error("%llu: Cannot set SO_KEEPALIVE on socket.", w->id);
+			error("Cannot set SO_KEEPALIVE on socket.", w->id);
 
 
 
@@ -206,7 +207,7 @@ int mysendfile(struct web_client* w, char* filename) {
 #ifdef NETDATA_WITH_ZLIB
 void web_client_enable_deflate(struct web_client* w) {
 	if (w->response.zinitialized == 1) {
-		error("%llu: Compression has already be initialized for this client.", w->id);
+		//error("%llu:Compression has already be initialized for this client.", w->id);
 		return;
 	}
 
@@ -246,9 +247,60 @@ void web_client_enable_deflate(struct web_client* w) {
 	w->response.zoutput = 1;
 	w->response.zinitialized = 1;
 
-	debug(D_DEFLATE, "%llu: Initialized compression.", w->id);
+	//debug(D_DEFLATE, "%llu: Initialized compression.", w->id);
 }
 #endif
+
+int web_client_api_request_v1_charts(struct web_client* w, char* url) {
+
+	buffer_flush(w->response.data);
+	w->response.data->contenttype = CT_APPLICATION_JSON;
+	rrd_stats_api_v1_charts(w->response.data);
+}
+
+int web_client_api_request_v1(struct web_client* w, char* url) {
+
+	//get the commond
+	char* tok = mystrsep(&url, "/?&");
+	if (tok && *tok) {
+		if (strcmp(tok, "data") == 0) {
+
+		}
+		else if (strcmp(tok, "charts") == 0) {
+			return web_client_requtst_v1_charts(w, url);
+		}
+	}
+	else {
+		buffer_flush(w->response.data);
+		buffer_sprintf(w->response.data, "API v1 command?");
+		return 400;
+
+	}
+
+}
+
+int web_client_api_request(struct web_client* w, char* url) {
+	
+	//get the api version
+	char* tok = mystrsep(&url, "/?&");
+	if (tok && *tok) {
+		if (strcmp(tok, "v1") == 0) {
+			return web_client_api_request_v1(w, url);
+		}
+		else {
+			buffer_flush(w->response.data);
+			buffer_sprintf(w->response.data, "Unsuported API version %s", tok);
+			return 404;
+		}
+	}
+	else {
+		buffer_flush(w->response.data);
+		buffer_sprintf(w->response.data, "Whitch API version?");
+		return 400;
+	}
+
+
+}
 
 void web_client_process(struct web_client *w){
 	
@@ -264,6 +316,9 @@ void web_client_process(struct web_client *w){
 		if (web_enable_gzip && strstr(w->response.data->buffer, "gzip"))
 			enable_gzip = 1;
 #endif
+		
+		int datasource_type = DATASOURCE_DATATABLE_JSONP;
+		char* pointer_to_free = NULL;
 
 		char* buf = (char*)buffer_tostring(w->response.data);
 		char* url = NULL;
@@ -271,7 +326,7 @@ void web_client_process(struct web_client *w){
 		char *tok = strsep_lqc(&buf, " \r\n");
 		if (buf&&strcmp(tok, "GET") == 0) {
 			tok = strsep_lqc(&buf, " \r\n");
-			url = url_decode(tok);
+			pointer_to_free=url = url_decode(tok);
 		}
 
 		w->last_url[0] = '\0';
@@ -284,12 +339,16 @@ void web_client_process(struct web_client *w){
 			if (enable_gzip)
 				web_client_enable_deflate(w);
 #endif
+			
+
+
 			strncpy(w->last_url, url, URL_MAX);
 			w->last_url[URL_MAX] = '\0';
 			tok = mystrsep(&url, "/?");
 			if (tok && *tok) {
 				if (strcmp(tok, "api") == 0) {
-
+					datasource_type = DATASOURCE_JSON;
+					code = web_client_api_request(w, url);
 				}
 
 				else {
@@ -313,6 +372,11 @@ void web_client_process(struct web_client *w){
 			}
 		}
 
+		//free url decode() buffer
+		if (pointer_to_free) {
+			free(pointer_to_free);
+			pointer_to_free = NULL;
+		}
 
 	}
 
@@ -602,7 +666,7 @@ long web_client_send_deflate(struct web_client* w)
 
 		// compress
 		if (deflate(&w->response.zstream, flush) == Z_STREAM_ERROR) {
-			error("%llu: Compression failed. Closing down client.", w->id);
+			//error("%llu: Compression failed. Closing down client.", w->id);
 			web_client_reset(w);
 			return(-1);
 		}
@@ -651,12 +715,12 @@ long web_client_send(struct web_client* w) {
 		web_client_reset(w);
 		return 0;
 	}
-	info("thread %d: sending data of ^s ", gettid(), w->last_url);
+	//info("thread %d: sending data of ^s ", gettid(), w->last_url);
 	bytes = send(w->ofd, &w->response.data->buffer[w->response.sent], w->response.data->len - w->response.sent, MSG_DONTWAIT);
 	if (bytes > 0) {
 
 		w->response.sent += bytes;
-		info("thread %d: sent data %d bytes", gettid(),bytes);
+		//info("thread %d: sent data %d bytes", gettid(),bytes);
 
 	}
 

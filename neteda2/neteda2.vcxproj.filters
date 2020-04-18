@@ -13,6 +13,7 @@
     <ClCompile Include="web_buffer.c" />
     <ClCompile Include="web_client.c" />
     <ClCompile Include="web_server.c" />
+    <ClCompile Include="rrd2json.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common.h" />
@@ -28,6 +29,7 @@
     <ClInclude Include="web_server.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="config.h" />
+    <ClInclude Include="rrd2json.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="web">

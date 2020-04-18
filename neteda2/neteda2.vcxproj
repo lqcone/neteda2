@@ -90,6 +90,7 @@
     <ClCompile Include="procfile.c" />
     <ClCompile Include="proc_stat.c" />
     <ClCompile Include="rrd.c" />
+    <ClCompile Include="rrd2json.c" />
     <ClCompile Include="strsep.c" />
     <ClCompile Include="url.c" />
     <ClCompile Include="web_buffer.c" />
@@ -105,6 +106,7 @@
     <ClInclude Include="procfile.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="rrd.h" />
+    <ClInclude Include="rrd2json.h" />
     <ClInclude Include="strsep.h" />
     <ClInclude Include="url.h" />
     <ClInclude Include="web_buffer.h" />
