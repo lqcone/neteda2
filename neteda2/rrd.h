@@ -14,6 +14,18 @@ extern int rrd_default_history_entries;
 #define RRDSET_TYPE_STACKED 2
 
 
+// ----------------------------------------------------------------------------
+// memory mode
+
+#define RRD_MEMORY_MODE_RAM_NAME "ram"
+#define RRD_MEMORY_MODE_MAP_NAME "map"
+#define RRD_MEMORY_MODE_SAVE_NAME "save"
+
+#define RRD_MEMORY_MODE_RAM 0
+#define RRD_MEMORY_MODE_MAP 1
+#define RRD_MEMORY_MODE_SAVE 2
+
+
 struct rrdset {
 
 	char id[RRD_ID_LENGTH_MAX + 1];

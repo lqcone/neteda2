@@ -34,7 +34,7 @@ struct netdata_static_thread {
 struct netdata_static_thread static_threads[] = {
 	{"proc",		"plugins",	"proc",			1, NULL, NULL,	proc_main},
 
-    {"web",          NULL,       NULL,          1, NULL, NULL,socket_listen_main},
+    {"web",          NULL,       NULL,          0, NULL, NULL,socket_listen_main},
 	{NULL,			 NULL,		 NULL,			0, NULL, NULL,  NULL}          //地址占用，确保不能访问其他变量地址
 };
 
