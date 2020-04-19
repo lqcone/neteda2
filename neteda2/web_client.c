@@ -256,6 +256,7 @@ int web_client_api_request_v1_charts(struct web_client* w, char* url) {
 	buffer_flush(w->response.data);
 	w->response.data->contenttype = CT_APPLICATION_JSON;
 	rrd_stats_api_v1_charts(w->response.data);
+	return 200;
 }
 
 int web_client_api_request_v1(struct web_client* w, char* url) {
@@ -267,7 +268,7 @@ int web_client_api_request_v1(struct web_client* w, char* url) {
 
 		}
 		else if (strcmp(tok, "charts") == 0) {
-			return web_client_requtst_v1_charts(w, url);
+			return web_client_api_request_v1_charts(w, url);
 		}
 	}
 	else {

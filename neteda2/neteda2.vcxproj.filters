@@ -14,6 +14,8 @@
     <ClCompile Include="web_client.c" />
     <ClCompile Include="web_server.c" />
     <ClCompile Include="rrd2json.c" />
+    <ClCompile Include="avl.c" />
+    <ClCompile Include="appconfig.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common.h" />
@@ -30,6 +32,8 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="config.h" />
     <ClInclude Include="rrd2json.h" />
+    <ClInclude Include="avl.h" />
+    <ClInclude Include="appconfig.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="web">

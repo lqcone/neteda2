@@ -11,7 +11,7 @@
 
 int do_proc_stat(int update_every,unsigned long long dt){
 	static procfile* ff = NULL;
-	static int do_cpu = 1;   //do_cpu_cores = -1;
+	static int do_cpu = 1,   do_cpu_cores = -1;
 	if (!ff) {
 		char filename[FILENAME_MAX + 1];
 		snprintf(filename,FILENAME_MAX,"%s%s",global_host_prefix,"/proc/stat" );
@@ -24,6 +24,7 @@ int do_proc_stat(int update_every,unsigned long long dt){
 
 	uint32_t lines = procfile_lines(ff), l;
 	uint32_t words;
+	RRDSET* st;
 
 	for (l = 0; l < lines; l++) {
 		if (strncmp(procfile_lineword(ff, l, 0), "cpu", 3) == 0) {
@@ -38,16 +39,37 @@ int do_proc_stat(int update_every,unsigned long long dt){
 
 			id = procfile_lineword(ff, l, 0);
 			user = strtoull(procfile_lineword(ff, l, 1), NULL, 10);
+			nice = strtoull(procfile_lineword(ff, l, 2), NULL, 10);
+			system = strtoull(procfile_lineword(ff, l, 3), NULL, 10);
+			idle = strtoull(procfile_lineword(ff, l, 4), NULL, 10);
+			iowait = strtoull(procfile_lineword(ff, l, 5), NULL, 10);
+			irq = strtoull(procfile_lineword(ff, l, 6), NULL, 10);
+			softirq = strtoull(procfile_lineword(ff, l, 7), NULL, 10);
+			steal = strtoull(procfile_lineword(ff, l, 8), NULL, 10);
+			if (words >= 10) guest = strtoull(procfile_lineword(ff, l, 9), NULL, 10);
+			if (words >= 11) guest_nice = strtoull(procfile_lineword(ff, l, 10), NULL, 10);
 
 
+			char* title = "Core utilization";
 			char* type = RRD_TYPE_STAT;
+			char* context = "cpu.cpu";
+			char* family = "utilization";
+			long priority = 1000;
 			int isthistotal = 0;
+
 			if (strcmp(id, "cpu") == 0) {
 				isthistotal = 1;
 				type = "system";
+				title = "Total CPU utilization";
+				context = "system.cpu";
+				family = id;
+				priority = 100;
 			}
-			if (isthistotal && do_cpu) {
-				//st=rrd_set
+			if ((isthistotal && do_cpu)||(!isthistotal&&do_cpu_cores)) {
+				st = rrdset_find_bytype(type, id);
+				if (!st) {
+					st = rrdset_create(type, id, NULL, family, context, title, "percentage", priority, update_every, RRDSET_TYPE_STACKED);
+				}
 			}
 
 
