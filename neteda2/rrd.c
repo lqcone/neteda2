@@ -8,6 +8,9 @@
 #include"rrd.h"
 #include"log.h"
 #include"appconfig.h"
+#include"config.h"
+
+#define RRD_DEFAULT_GAP_INTERPOLATIONS 1
 
 int rrd_delete_unupdated_dimensions = 0;
 
@@ -18,6 +21,9 @@ RRDSET* rrdset_root = NULL;
 pthread_rwlock_t rrdset_root_rwlock = PTHREAD_RWLOCK_INITIALIZER;
 
 int rrd_memory_mode = RRD_MEMORY_MODE_SAVE;
+
+#define rrdset_index_add(st) avl_insert(&rrdset_root_index, (avl *)(st))
+#define rrdset_index_del(st) avl_remove(&rrdset_root_index, (avl *)(st))
 
 
 
@@ -47,6 +53,42 @@ static RRDSET* rrdset_index_find(const char* id, uint32_t hash) {
 	avl_search(&(rrdset_root_index), (avl*)&tmp, rrdset_iterator, (avl**)&result);
 	return result;
 }
+
+static int rrddim_iterator(avl* a) { if (a) {}; return 0; }
+
+static int rrddim_compare(void* a, void* b) {
+	if (((RRDDIM*)a)->hash < ((RRDDIM*)b)->hash) return -1;
+	else if (((RRDDIM*)a)->hash > ((RRDDIM*)b)->hash) return 1;
+	else return strcmp(((RRDDIM*)a)->id, ((RRDDIM*)b)->id);
+}
+
+int rrdset_type_id(const char* name)
+{
+	if (unlikely(strcmp(name, RRDSET_TYPE_AREA_NAME) == 0)) return RRDSET_TYPE_AREA;
+	else if (unlikely(strcmp(name, RRDSET_TYPE_STACKED_NAME) == 0)) return RRDSET_TYPE_STACKED;
+	else if (unlikely(strcmp(name, RRDSET_TYPE_LINE_NAME) == 0)) return RRDSET_TYPE_LINE;
+	return RRDSET_TYPE_LINE;
+}
+
+const char* rrdset_type_name(int chart_type)
+{
+	static char line[] = RRDSET_TYPE_LINE_NAME;
+	static char area[] = RRDSET_TYPE_AREA_NAME;
+	static char stacked[] = RRDSET_TYPE_STACKED_NAME;
+
+	switch (chart_type) {
+	case RRDSET_TYPE_LINE:
+		return line;
+
+	case RRDSET_TYPE_AREA:
+		return area;
+
+	case RRDSET_TYPE_STACKED:
+		return stacked;
+	}
+	return line;
+}
+
 
 char* rrdset_strncpy_name(char* to, const char* from, int length)
 {
@@ -131,6 +173,66 @@ RRDSET* rrdset_create(const char* type, const char* id, const char* name, const 
 		return st;
 	}
 
+	long entries = config_get_number(fullid, "history", rrd_default_history_entries);
+	if (entries < 5) entries = config_set_number(fullid, "history", 5);
+	if (entries > RRD_HISTORY_ENTRIES_MAX) entries = config_set_number(fullid, "history", RRD_HISTORY_ENTRIES_MAX);
+
+	int enabled = config_get_boolean(fullid, "enabled", 1);
+	if (!enabled) entries = 5;
+
+	unsigned long size = sizeof(RRDSET);
 	char* cache_dir = rrdset_cache_dir(fullid);
+
+	if (!st) {
+		st = calloc(1, size);
+		if (!st) {
+			fatal("Cannot allocate memory for RRD_STATS %s.%s", type, id);
+			return NULL;
+		}
+	}
+
+	st->memsize = size;
+	st->entries = entries;
+	st->update_every = update_every;
+
+	strcpy(st->cache_filename, fullfilename);
+	strcpy(st->magic, RRDSET_MAGIC);
+
+	strcpy(st->id, fullid);
+	st->hash = simple_hash(st->id);
+
+	st->cache_dir = cache_dir;
+
+	st->chart_type = rrdset_type_id(config_get(st->id, "chart type", rrdset_type_name(chart_type)));
+	st->type = config_get(st->id, "type", type);
+	st->family = config_get(st->id, "family", family ? family : st->type);
+	st->context = config_get(st->id, "context", context ? context : st->id);
+	st->units = config_get(st->id, "units", units ? units : "");
+
+	st->priority = config_get_number(st->id, "priority", priority);
+	st->enabled = enabled;
+
+	st->isdetail = 0;
+	st->debug = 0;
+
+	st->last_collected_time.tv_sec = 0;
+	st->last_collected_time.tv_usec = 0;
+	st->counter_done = 0;
+
+	st->gap_when_lost_iterations_above = (int)(
+		config_get_number(st->id, "gap when lost iterations above", RRD_DEFAULT_GAP_INTERPOLATIONS) + 2);
+
+	avl_init(&st->dimensions_index, rrddim_compare);
+
+
+	pthread_rwlock_init(&st->rwlock, NULL);
+	pthread_rwlock_wrlock(&rrdset_root_rwlock);
+
+	st->next = rrdset_root;
+	rrdset_root = st;
+
+	rrdset_index_add(st);
+
+	pthread_rwlock_unlock(&rrdset_root_rwlock);
 
 }

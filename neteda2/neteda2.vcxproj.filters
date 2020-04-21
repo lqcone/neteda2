@@ -16,6 +16,7 @@
     <ClCompile Include="rrd2json.c" />
     <ClCompile Include="avl.c" />
     <ClCompile Include="appconfig.c" />
+    <ClCompile Include="storage_number.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common.h" />
@@ -34,6 +35,7 @@
     <ClInclude Include="rrd2json.h" />
     <ClInclude Include="avl.h" />
     <ClInclude Include="appconfig.h" />
+    <ClInclude Include="storage_number.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="web">

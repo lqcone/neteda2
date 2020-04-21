@@ -98,6 +98,7 @@
     <ClCompile Include="web_buffer.c" />
     <ClCompile Include="web_client.c" />
     <ClCompile Include="web_server.c" />
+    <ClCompile Include="storage_number.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="avl.h" />
@@ -110,6 +111,7 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="rrd.h" />
     <ClInclude Include="rrd2json.h" />
+    <ClInclude Include="storage_number.h" />
     <ClInclude Include="strsep.h" />
     <ClInclude Include="url.h" />
     <ClInclude Include="web_buffer.h" />
