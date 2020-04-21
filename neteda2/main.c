@@ -8,6 +8,8 @@
 #include"plugin_proc.h"
 #include"web_server.h"
 #include"strsep.h"
+#include"appconfig.h"
+#include"common.h"
 
 
 int listen_baklog = LISTEN_BACKLOG;
@@ -39,16 +41,14 @@ struct netdata_static_thread static_threads[] = {
 };
 
 
+
+
 void main()
 {
 	int i;
-/*	char* s;
-	const char *sep = " ";
-	char buff[100] = { "User - Agent:Mozilla / 5.0 (Windows NT 10.0; Win64" };
-	s = buff;
-	char* tok = strsep_lqc(&s, sep);	
-	printf("%s\n", tok);
-*/
+	char* t;
+	t = (char*)config_get("global", "cache directory", CACHE_DIR);
+
 
 	
 	{

@@ -7,6 +7,7 @@
 #include"common.h"
 #include"rrd.h"
 #include"log.h"
+#include"appconfig.h"
 
 int rrd_delete_unupdated_dimensions = 0;
 
@@ -64,8 +65,10 @@ char* rrdset_cache_dir(const char* id)
 {
 	char* ret = NULL;
 
-	static char* cache_dir = NULL;
-	if (!cache_dir) cache_dir = config_get("global", "cache directory", CACHE_DIR);
+	char* cache_dir = NULL;
+		if (!cache_dir) {
+			cache_dir = config_get("global", "cache directory", CACHE_DIR);
+		}
 
 	char b[FILENAME_MAX + 1];
 	char n[FILENAME_MAX + 1];

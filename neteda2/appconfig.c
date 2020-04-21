@@ -288,7 +288,7 @@ char* config_get(const char* section, const char* name, const char* default_valu
 		}
 	}
 
-	return(cv->value);
+	return (cv->value);
 }
 
 long long config_get_number(const char* section, const char* name, long long value)

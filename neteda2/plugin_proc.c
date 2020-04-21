@@ -18,6 +18,12 @@ unsigned long long sutime(){
 void* proc_main(void* ptr){
 	
 	//if (ptr) { ; }
+
+	//if (pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL) != 0)
+//		error("Cannot set pthread cancel type to DEFERRED.");
+
+//	if (pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL) != 0)
+//		error("Cannot set pthread cancel state to ENABLE.");
 	
 	int vdo_proc_stat = 0;
 	unsigned long long sunow;
