@@ -548,6 +548,11 @@ void web_client_process(struct web_client *w){
 	flag = 1;
 	if (setsockopt(w->ofd, IPPROTO_TCP, TCP_NODELAY, (char*)&flag, sizeof(int)) != 0) 
 		error("%llu: failed to enable TCP_NODELAY on socket.", w->id);
+
+	//如果有数据到来，将数据发送出去
+	if (w->response.data->len)
+		w->wait_send = 1;
+	else w->wait_send = 0;
 }
 
 long web_client_send_chunk_header(struct web_client* w, long len)
