@@ -37,6 +37,8 @@ typedef long long total_number;
 #define RRDSET_TYPE_STACKED 2
 
 
+const char* rrdset_type_name(int chart_type);
+
 // ----------------------------------------------------------------------------
 // memory mode
 
@@ -225,6 +227,14 @@ extern RRDSET* rrdset_create(const char* type, const char* id, const char* name,
 
 
 
+// get the total duration in seconds of the round robin database
+#define rrdset_duration(st) ((time_t)( (((st)->counter >= ((unsigned long)(st)->entries))?(unsigned long)(st)->entries:(st)->counter) * (st)->update_every ))
+
+// get the timestamp of the last entry in the round robin database
+#define rrdset_last_entry_t(st) ((time_t)(((st)->last_updated.tv_sec)))
+
+// get the timestamp of first entry in the round robin database
+#define rrdset_first_entry_t(st) ((time_t)(rrdset_last_entry_t(st) - rrdset_duration(st)))
 
 
 

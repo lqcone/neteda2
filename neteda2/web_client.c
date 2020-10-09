@@ -347,7 +347,7 @@ void web_client_process(struct web_client *w){
 			w->last_url[URL_MAX] = '\0';
 			tok = mystrsep(&url, "/?");
 			if (tok && *tok) {
-				if (strcmp(tok, "api") == 0) {
+ 				if (strcmp(tok, "api") == 0) {
 					datasource_type = DATASOURCE_JSON;
 					code = web_client_api_request(w, url);
 				}

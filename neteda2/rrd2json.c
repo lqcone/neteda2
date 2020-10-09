@@ -12,36 +12,36 @@ void rrd_stats_api_v1_chart(RRDSET* st, BUFFER* wb) {
 	buffer_sprintf(wb,
 		"\t\t{\n"
 		"\t\t\t\"id\": \"%s\",\n"
-	//	"\t\t\t\"name\": \"%s\",\n"
-	//	"\t\t\t\"type\": \"%s\",\n"
-	//	"\t\t\t\"family\": \"%s\",\n"
-	//	"\t\t\t\"context\": \"%s\",\n"
-	//	"\t\t\t\"title\": \"%s\",\n"
-	//	"\t\t\t\"priority\": %ld,\n"
+		"\t\t\t\"name\": \"%s\",\n"
+		"\t\t\t\"type\": \"%s\",\n"
+		"\t\t\t\"family\": \"%s\",\n"
+		"\t\t\t\"context\": \"%s\",\n"
+		"\t\t\t\"title\": \"%s\",\n"
+		"\t\t\t\"priority\": %ld,\n"
 		"\t\t\t\"enabled\": %s,\n"
-	//	"\t\t\t\"units\": \"%s\",\n"
-	//	"\t\t\t\"data_url\": \"/api/v1/data?chart=%s\",\n"
-	//	"\t\t\t\"chart_type\": \"%s\",\n"
-	//	"\t\t\t\"duration\": %ld,\n"
-	//	"\t\t\t\"first_entry\": %lu,\n"
-	//	"\t\t\t\"last_entry\": %lu,\n"
-	//	"\t\t\t\"update_every\": %d,\n"
-	//	"\t\t\t\"dimensions\": {\n"
+		"\t\t\t\"units\": \"%s\",\n"
+		"\t\t\t\"data_url\": \"/api/v1/data?chart=%s\",\n"
+		"\t\t\t\"chart_type\": \"%s\",\n"
+		"\t\t\t\"duration\": %ld,\n"
+		"\t\t\t\"first_entry\": %lu,\n"
+		"\t\t\t\"last_entry\": %lu,\n"
+		"\t\t\t\"update_every\": %d,\n"
+		"\t\t\t\"dimensions\": {\n"
 		, st->id
-	//	, st->name
-	//	, st->type
-	//	, st->family
-	//	, st->context
-	//	, st->title
-	//	, st->priority
+		, st->name
+		, st->type
+		, st->family
+		, st->context
+		, st->title
+		, st->priority
 		, st->enabled ? "true" : "false"
-	//	, st->units
-	//	, st->name
-	//	, rrdset_type_name(st->chart_type)
-	//	, st->entries * st->update_every
-	//	, rrdset_first_entry_t(st)
-	//	, rrdset_last_entry_t(st)
-	//	, st->update_every
+		, st->units
+		, st->name
+		, rrdset_type_name(st->chart_type)
+		, st->entries * st->update_every
+		, rrdset_first_entry_t(st)
+		, rrdset_last_entry_t(st)
+		, st->update_every
 	);
 
 	buffer_sprintf(wb,
