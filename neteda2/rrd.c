@@ -147,6 +147,12 @@ RRDSET* rrdset_find_bytype(const char* type, const char *id) {
 	return(rrdset_find(buf));
 }
 
+RRDSET* rrdset_find_byname(const char* name) {
+	RRDSET *st;
+
+	return st;
+
+}
 
 
 RRDSET* rrdset_create(const char* type, const char* id, const char* name, const char* family, const char* context, const char* title, const char* units, long priority, int update_every, int chart_type) {

@@ -20,6 +20,7 @@
 #include"common.h"
 #include"config.h"
 #include"rrd2json.h"
+#include "rrd.h"
 
 
 #define INITAL_WEB_DATA_LENGTH 16384
@@ -259,13 +260,53 @@ int web_client_api_request_v1_charts(struct web_client* w, char* url) {
 	return 200;
 }
 
+int web_client_api_request_v1_data(struct web_client* w, char* url) {
+
+	int ret = 400;
+
+	buffer_flush(w->response.data);
+
+	char* chart = NULL;
+
+	while (url) {
+
+		char* value = mystrsep(&url, "?&[]");
+		if (!value || !*value) continue;
+		char* name = mystrsep(&value, "=");
+		if (!name || !*name) continue;
+		if (!value || !*value) continue;
+		if (!strcmp(name, "chart")) chart = value;
+		
+
+
+	}
+
+	if (!chart || !*chart) {
+		buffer_sprintf(w->response.data, "No chart id is given at the request.");
+		goto cleanup;
+	}
+
+	RRDSET* st = rrdset_find(chart);
+	//if (!st) st = rrdset_find_byname(chart);
+	if (!st) {
+		buffer_sprintf(w->response.data, "Chart '%s' is not fount.", chart);
+		ret = 404;
+		goto cleanup;
+	}
+
+
+cleanup:
+	return ret;
+}
+
 int web_client_api_request_v1(struct web_client* w, char* url) {
 
 	//get the commond
 	char* tok = mystrsep(&url, "/?&");
 	if (tok && *tok) {
 		if (strcmp(tok, "data") == 0) {
-
+			//开始传输数据
+			return web_client_api_request_v1_data(w, url);
 		}
 		else if (strcmp(tok, "charts") == 0) {
 			return web_client_api_request_v1_charts(w, url);
@@ -712,7 +753,7 @@ long web_client_send(struct web_client* w) {
 	
 	long bytes;
 
-	if (w->response.rlen - w->response.sent == 0) {
+	if (w->response.data->len - w->response.sent == 0) {
 		if (w->mode == WEB_CLIENT_MODE_FILECOPY && w->wait_receive && w->ifd != w->ofd && w->response.rlen && w->response.rlen > w->response.data->len) {
 			// we have to wait, more data will come
 			w->wait_send = 0;

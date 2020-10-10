@@ -219,7 +219,10 @@ extern RRDSET* rrdset_root;
 extern pthread_rwlock_t rrdset_root_rwlock;
 
 
+extern RRDSET* rrdset_find(const char *id);
 extern RRDSET* rrdset_find_bytype(const char* type, const char* id);
+//extern RRDSET* rrdset_find_byname(const char* name);
+
 
 
 extern RRDSET* rrdset_create(const char* type, const char* id, const char* name, const char* family, const char* context, const char* title, const char* units, long priority, int update_every, int chart_type);
