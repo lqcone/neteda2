@@ -252,6 +252,17 @@ void web_client_enable_deflate(struct web_client* w) {
 }
 #endif
 
+uint32_t web_client_api_request_v1_data_format(char* name) {
+
+	if (!strcmp(name, DATASOURCE_FORMAT_DATATABLE_JSON))
+		return DATASOURCE_DATATABLE_JSON;
+	else if (!strcmp(name, DATASOURCE_FORMAT_DATATABLE_JSONP))
+		return DATASOURCE_DATATABLE_JSONP;
+	else if (!strcmp(name, DATASOURCE_FORMAT_JSON))
+		return DATASOURCE_JSON;
+
+}
+
 int web_client_api_request_v1_charts(struct web_client* w, char* url) {
 
 	buffer_flush(w->response.data);
@@ -267,6 +278,8 @@ int web_client_api_request_v1_data(struct web_client* w, char* url) {
 	buffer_flush(w->response.data);
 
 	char* chart = NULL;
+	
+	uint32_t format = DATASOURCE_JSON;
 
 	while (url) {
 
@@ -276,7 +289,9 @@ int web_client_api_request_v1_data(struct web_client* w, char* url) {
 		if (!name || !*name) continue;
 		if (!value || !*value) continue;
 		if (!strcmp(name, "chart")) chart = value;
-		
+		else if (!strcmp(name, "format")) {
+			format = web_client_api_request_v1_data_format(name);
+		}
 
 
 	}
@@ -294,6 +309,7 @@ int web_client_api_request_v1_data(struct web_client* w, char* url) {
 		goto cleanup;
 	}
 
+	ret = rrd2format(st, w->response.data, format);
 
 cleanup:
 	return ret;

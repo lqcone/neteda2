@@ -5,6 +5,9 @@
 #include"avl.h"
 #include"storage_number.h"
 
+#ifndef NETDATA_RRD_H
+#define NETDATA_RRD_H 1
+
 #define UPDATE_EVERY 1
 extern int rrd_update_every;
 
@@ -243,3 +246,5 @@ extern RRDSET* rrdset_create(const char* type, const char* id, const char* name,
 
 
 //extern
+
+#endif
