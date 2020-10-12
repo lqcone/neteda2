@@ -43,8 +43,12 @@ struct netdata_static_thread static_threads[] = {
 
 
 
+
 void main()
 {
+	
+
+	
 	int i;
 	char* t;
 	t = (char*)config_get("global", "cache directory", CACHE_DIR);

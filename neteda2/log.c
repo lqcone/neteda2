@@ -161,6 +161,7 @@ void error_int(const char *prefix,const char* file, const char* function, const 
 
 	if (debug_flags) fprintf(stderr, "%s (%04lu@%-10.10s:%-15.15s): %s: ",prefix, line, file, function, program_name);
 	else            fprintf(stderr, "%s: %s: ",prefix, program_name);
+	va_start(args, fmt);
 	vfprintf(stderr, fmt, args);
 	va_end(args);
 
