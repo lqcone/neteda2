@@ -86,6 +86,9 @@ typedef struct rrdresult {
 	RRDSET* st;            //与结果关联的指标值
 
 	int d;                // 维度的数量
+	int n;                // 每个维度的数值数量
+
+	calculated_number* v;   //指标值数组
 
 	int has_st_lock;      //判断对应指标是否被读锁
 } RRDR;
@@ -106,9 +109,57 @@ static void rrdr2json(RRDR* r, BUFFER* wb) {
 		data_begin[101] = "",			// between labels and values
 		finish[101] = "";				// at the end of everything
 
+	int datatable = 0;
+	if( datatable){}
+	else {
+
+		kq[0] = '"';
+		sq[0] = '"';
+
+		snprintf(pre_date, 100, "		[ ");
+		snprintf(pre_label, 100, ", \"");
+		snprintf(post_label, 100, "\"");
+		snprintf(pre_value, 100, ", ");
+		snprintf(post_line, 100, "]");
+		snprintf(data_begin, 100, "],\n	%sdata%s:\n	[\n", kq, kq);
+		snprintf(finish, 100, "\n	]\n}");
+
+		buffer_sprintf(wb, "{\n	%slabels%s: [", kq, kq);
+		buffer_sprintf(wb, "%stime%s", sq, sq);
+
+	}
+
+	long c, i;
+	RRDDIM* rd;
+
+	for (c = 0, i = 0, rd = r->st->dimensions; rd && c < r->d; c++, rd = rd->next) {
+		buffer_strcat(wb, pre_label);
+		buffer_strcat(wb, rd->name);
+		buffer_strcat(wb, post_label);
+		i++;
+	}
+	if (!i) {
+		buffer_strcat(wb, pre_label);
+		buffer_strcat(wb, "no data");
+		buffer_strcat(wb, post_label);
+	}
+
+	// print the begin of row data
+	buffer_strcat(wb, data_begin);
+
+	// if all dimensions are hidden, print a null
+	if (!i) {
+		buffer_strcat(wb, finish);
+		return;
+	}
+
+
+
+
 }
 
-static RRDR* rrdr_create(RRDSET* st) {
+//创建RRDR，绑定RRDSET，指定每个维度值的数量n
+static RRDR* rrdr_create(RRDSET* st,long n) {
 
 	if (!st) {
 		error("NULL value given!");
@@ -125,6 +176,9 @@ static RRDR* rrdr_create(RRDSET* st) {
 	for (rd = st->dimensions; rd; rd = rd->next)
 		r->d++;
 
+	r->n = n;
+
+	r->v = malloc(n * r->d * sizeof(calculated_number));
 	
 	return r;
 	
@@ -133,9 +187,13 @@ cleanup:
 	return NULL;
 }
 
-RRDR* rrd2rrdr(RRDSET* st) {
+RRDR* rrd2rrdr(RRDSET* st,long points) {
 
-	RRDR* r = rrdr_create(st);
+	RRDR* r = rrdr_create(st,points);
+	if (!r) {
+		return NULL;
+	}
+
 
 	return r;
 }

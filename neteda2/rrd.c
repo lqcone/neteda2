@@ -103,6 +103,18 @@ char* rrdset_strncpy_name(char* to, const char* from, int length)
 	return to;
 }
 
+void rrdset_set_name(RRDSET* st, const char* name) {
+
+	char b[CONFIG_MAX_VALUE + 1];
+	char n[RRD_ID_LENGTH_MAX + 1];
+
+	snprintf(n, RRD_ID_LENGTH_MAX, "%s.%s", st->type, name);
+	rrdset_strncpy_name(b, n, CONFIG_MAX_VALUE);
+	st->name = config_get(st->id, "name", b);
+	st->hash_name = simple_hash(st->name);
+
+}
+
 char* rrdset_cache_dir(const char* id)
 {
 	char* ret = NULL;
@@ -127,6 +139,7 @@ char* rrdset_cache_dir(const char* id)
 
 	return ret;
 }
+
 
 
 RRDSET* rrdset_find(const char* id) {
@@ -233,6 +246,9 @@ RRDSET* rrdset_create(const char* type, const char* id, const char* name, const 
 
 	pthread_rwlock_init(&st->rwlock, NULL);
 	pthread_rwlock_wrlock(&rrdset_root_rwlock);
+
+	if (name && *name) {}
+	else rrdset_set_name(st, id);
 
 	st->next = rrdset_root;
 	rrdset_root = st;
