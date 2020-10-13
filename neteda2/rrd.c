@@ -62,6 +62,47 @@ static int rrddim_compare(void* a, void* b) {
 	else return strcmp(((RRDDIM*)a)->id, ((RRDDIM*)b)->id);
 }
 
+#define rrddim_index_add(st, rd) avl_insert(&((st)->dimensions_index), (avl *)(rd))
+#define rrddim_index_del(st,rd ) avl_remove(&((st)->dimensions_index), (avl *)(rd))
+
+// ----------------------------------------------------------------------------
+// algorithms types
+
+int rrddim_algorithm_id(const char* name)
+{
+	if (strcmp(name, RRDDIM_ABSOLUTE_NAME) == 0) 			return RRDDIM_ABSOLUTE;
+	if (strcmp(name, RRDDIM_INCREMENTAL_NAME) == 0) 			return RRDDIM_INCREMENTAL;
+	if (strcmp(name, RRDDIM_PCENT_OVER_ROW_TOTAL_NAME) == 0) 		return RRDDIM_PCENT_OVER_ROW_TOTAL;
+	if (strcmp(name, RRDDIM_PCENT_OVER_DIFF_TOTAL_NAME) == 0) 	return RRDDIM_PCENT_OVER_DIFF_TOTAL;
+	return RRDDIM_ABSOLUTE;
+}
+
+
+
+const char* rrddim_algorithm_name(int chart_type)
+{
+	static char absolute[] = RRDDIM_ABSOLUTE_NAME;
+	static char incremental[] = RRDDIM_INCREMENTAL_NAME;
+	static char percentage_of_absolute_row[] = RRDDIM_PCENT_OVER_ROW_TOTAL_NAME;
+	static char percentage_of_incremental_row[] = RRDDIM_PCENT_OVER_DIFF_TOTAL_NAME;
+
+	switch (chart_type) {
+	case RRDDIM_ABSOLUTE:
+		return absolute;
+
+	case RRDDIM_INCREMENTAL:
+		return incremental;
+
+	case RRDDIM_PCENT_OVER_ROW_TOTAL:
+		return percentage_of_absolute_row;
+
+	case RRDDIM_PCENT_OVER_DIFF_TOTAL:
+		return percentage_of_incremental_row;
+	}
+	return absolute;
+}
+
+
 int rrdset_type_id(const char* name)
 {
 	if (unlikely(strcmp(name, RRDSET_TYPE_AREA_NAME) == 0)) return RRDSET_TYPE_AREA;
@@ -257,4 +298,52 @@ RRDSET* rrdset_create(const char* type, const char* id, const char* name, const 
 
 	pthread_rwlock_unlock(&rrdset_root_rwlock);
 
+}
+
+RRDDIM* rrddim_add(RRDSET* st, const char* id, const char* name, int algorithm) {
+
+	char varname[CONFIG_MAX_NAME + 1];
+
+	RRDDIM* rd = NULL;
+	unsigned long size = sizeof(RRDDIM);
+
+	if(rd){}
+
+	if(rd){}
+
+	else {
+		rd = calloc(1, size);
+		if (!rd) {
+			fatal("Cannot allocate RRD_DIENSION %s%", st->id, id);
+			return NULL;
+		}
+		//rd->mapped = RRD_MEMORY_MODE_RAM;
+	}
+	rd->memsize = size;
+
+	strncpy(rd->id, id, RRD_ID_LENGTH_MAX);
+	rd->hash = simple_hash(rd->id);
+	snprintf(varname, CONFIG_MAX_NAME, "dim %s name", rd->id);
+	rd->name = config_get(st->id, varname, (name && *name) ? name : rd->id);
+
+	snprintf(varname, CONFIG_MAX_NAME, "dim %s algorithm", rd->id);
+	rd->algorithm = rrddim_algorithm_id(config_get(st->id, varname, rrddim_algorithm_name(algorithm)));
+
+	rd->update_every = st->update_every;
+
+	//重要：在数据集中增加这个维度
+	pthread_rwlock_wrlock(&st->rwlock);
+	if (!st->dimensions)
+		st->dimensions = rd;
+	else {
+		RRDDIM* td = st->dimensions;
+		for (; td->next; td = td->next);
+		td->next = rd;
+	}
+	pthread_rwlock_unlock(&st->rwlock);
+	rrddim_index_add(st, rd);
+
+
+
+	return rd;
 }

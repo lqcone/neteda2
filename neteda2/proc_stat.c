@@ -69,6 +69,7 @@ int do_proc_stat(int update_every,unsigned long long dt){
 				st = rrdset_find_bytype(type, id);
 				if (!st) {
 					st = rrdset_create(type, id, NULL, family, context, title, "percentage", priority, update_every, RRDSET_TYPE_STACKED);
+					rrddim_add(st, "guest", NULL, RRDDIM_PCENT_OVER_DIFF_TOTAL);
 				}
 			}
 

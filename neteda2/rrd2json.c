@@ -198,9 +198,9 @@ RRDR* rrd2rrdr(RRDSET* st,long points) {
 	return r;
 }
 
-int rrd2format(RRDSET* st, BUFFER* wb,uint32_t format) {
+int rrd2format(RRDSET* st, BUFFER* wb,uint32_t format,long points) {
 
-	RRDR* r = rrd2rrdr(st);
+	RRDR* r = rrd2rrdr(st,points);
 	if (!r) {
 		buffer_strcat(wb, "Cannot generate output with these parameters on this chart.");
 		return 500;

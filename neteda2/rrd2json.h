@@ -30,4 +30,4 @@
 
 extern void rrd_stats_api_v1_charts(BUFFER* wb);
 
-extern int rrd2format(RRDSET* st, BUFFER* out, uint32_t format);
+extern int rrd2format(RRDSET* st, BUFFER* out, uint32_t format,long points);

@@ -54,6 +54,20 @@ const char* rrdset_type_name(int chart_type);
 #define RRD_MEMORY_MODE_SAVE 2
 
 
+// ----------------------------------------------------------------------------
+// algorithms types
+
+#define RRDDIM_ABSOLUTE_NAME 				"absolute"
+#define RRDDIM_INCREMENTAL_NAME 			"incremental"
+#define RRDDIM_PCENT_OVER_DIFF_TOTAL_NAME	"percentage-of-incremental-row"
+#define RRDDIM_PCENT_OVER_ROW_TOTAL_NAME	"percentage-of-absolute-row"
+
+#define RRDDIM_ABSOLUTE                0
+#define RRDDIM_INCREMENTAL             1
+#define RRDDIM_PCENT_OVER_DIFF_TOTAL   2
+#define RRDDIM_PCENT_OVER_ROW_TOTAL    3
+
+
 struct rrddim {
 	// ------------------------------------------------------------------------
 	// binary indexing structures
@@ -243,6 +257,10 @@ extern RRDSET* rrdset_create(const char* type, const char* id, const char* name,
 #define rrdset_first_entry_t(st) ((time_t)(rrdset_last_entry_t(st) - rrdset_duration(st)))
 
 
+
+//RRDDIMº¯ÊýÉùÃ÷
+
+extern RRDDIM* rrddim_add(RRDSET* st, const char* id, const char* name, int algorithm);
 
 
 //extern

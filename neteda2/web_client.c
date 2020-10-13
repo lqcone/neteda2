@@ -277,7 +277,7 @@ int web_client_api_request_v1_data(struct web_client* w, char* url) {
 
 	buffer_flush(w->response.data);
 
-	char* chart = NULL;
+	char* chart = NULL,*points_str = NULL;
 	
 	uint32_t format = DATASOURCE_JSON;
 
@@ -288,10 +288,13 @@ int web_client_api_request_v1_data(struct web_client* w, char* url) {
 		char* name = mystrsep(&value, "=");
 		if (!name || !*name) continue;
 		if (!value || !*value) continue;
+
 		if (!strcmp(name, "chart")) chart = value;
 		else if (!strcmp(name, "format")) {
 			format = web_client_api_request_v1_data_format(name);
 		}
+		else if (!strcmp(name, "points"))
+			points_str = value;
 
 
 	}
@@ -309,7 +312,9 @@ int web_client_api_request_v1_data(struct web_client* w, char* url) {
 		goto cleanup;
 	}
 
-	ret = rrd2format(st, w->response.data, format);
+	int points = (points_str && *points_str) ? atoi(points_str) : 0;
+
+	ret = rrd2format(st, w->response.data, format, points);
 
 cleanup:
 	return ret;
