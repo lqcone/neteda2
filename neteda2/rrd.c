@@ -298,6 +298,8 @@ RRDSET* rrdset_create(const char* type, const char* id, const char* name, const 
 
 	pthread_rwlock_unlock(&rrdset_root_rwlock);
 
+	return st;
+
 }
 
 RRDDIM* rrddim_add(RRDSET* st, const char* id, const char* name, int algorithm) {

@@ -87,8 +87,13 @@ typedef struct rrdresult {
 
 	int d;                // 维度的数量
 	int n;                // 每个维度的数值数量
+	long rows;            //已经使用的列数
 
 	calculated_number* v;   //指标值数组
+
+	long c;                //代表当前行数，初始值为-1，代表无当前行数。使用宏定义rddr_rows()获取此值
+	
+	long update_every;      //每秒数据采集的频率
 
 	int has_st_lock;      //判断对应指标是否被读锁
 } RRDR;
@@ -179,6 +184,10 @@ static RRDR* rrdr_create(RRDSET* st,long n) {
 	r->n = n;
 
 	r->v = malloc(n * r->d * sizeof(calculated_number));
+
+	r->c = -1;
+
+	r->update_every = 1;
 	
 	return r;
 	
@@ -193,6 +202,8 @@ RRDR* rrd2rrdr(RRDSET* st,long points) {
 	if (!r) {
 		return NULL;
 	}
+
+
 
 
 	return r;
